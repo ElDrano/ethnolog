@@ -18,10 +18,66 @@ body {
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: linear-gradient(135deg, #232526 0%, #414345 50%, #e0e0e0 100%);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body.light-mode {
+  --background: #fff;
+  --foreground: #171717;
+  color: #171717;
+  background: #fff;
+}
+
+body.light-mode .sidebar-nav {
+  background: linear-gradient(135deg, #e0f0ff 0%, #b3d8ff 100%);
+  border-right: 1px solid #b3d8ff;
+}
+
+body.light-mode .sidebar-title,
+body.light-mode .sidebar-link {
+  color: #232b5d !important;
+  text-shadow: none !important;
+}
+
+body.light-mode .sidebar-link {
+  background: linear-gradient(120deg, rgba(30,41,126,0.06) 0%, rgba(80,120,255,0.06) 100%) !important;
+  color: #232b5d !important;
+}
+
+body.light-mode .sidebar-link:hover,
+body.light-mode .sidebar-link:focus {
+  background: linear-gradient(120deg, rgba(30,41,126,0.13) 0%, rgba(80,120,255,0.13) 100%) !important;
+  color: #232b5d !important;
+}
+
+body.light-mode input,
+body.light-mode textarea,
+body.light-mode select {
+  background: #fff !important;
+  color: #171717 !important;
+  border-color: #b3d8ff !important;
+}
+
+body.light-mode .sidebar-login input,
+body.light-mode .sidebar-login button {
+  color: #232b5d !important;
+}
+
+body.light-mode .sidebar-login button {
+  background: #b3d8ff !important;
+}
+
+body.light-mode .sidebar-login button[type="submit"] {
+  background: #232b5d !important;
+  color: #fff !important;
+}
+
+body.light-mode .sidebar-login button[type="button"] {
+  background: #b3d8ff !important;
+  color: #232b5d !important;
 }
 
 * {

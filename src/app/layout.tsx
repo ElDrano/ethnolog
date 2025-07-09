@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
+import "./sidebar.css";
+import SidebarNav from "./SidebarNav";
+import DarkModeToggle from "./DarkModeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,9 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="de">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <div style={{ display: 'flex', minHeight: '100vh' }}>
+          <SidebarNav />
+          <main style={{ flex: 1, padding: '2rem', background: 'var(--background)', position: 'relative' }}>
+            <DarkModeToggle />
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
