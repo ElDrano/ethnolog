@@ -51,13 +51,15 @@ export default function SidebarLogin() {
   }
 
   if (user) {
+    // Light Mode erkennen
+    const isLight = typeof window !== "undefined" && document.body.classList.contains("light-mode");
     return (
       <div style={{ marginTop: 32, width: '100%', color: '#e3eafe', display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>Eingeloggt als:</div>
         <div style={{ wordBreak: 'break-all', marginBottom: 8 }}>{user.email}</div>
         <button
           onClick={handleLogout}
-          style={{ padding: 8, borderRadius: 6, background: '#1a237e', color: '#fff', fontWeight: 600, border: 'none', cursor: 'pointer', marginTop: 0 }}
+          style={{ padding: 8, borderRadius: 6, background: isLight ? '#f3f3f3' : '#1a237e', color: isLight ? '#232b5d' : '#fff', fontWeight: 600, border: 'none', cursor: 'pointer', marginTop: 0 }}
           disabled={loading}
         >
           {loading ? "Abmelden..." : "Logout"}
@@ -88,7 +90,16 @@ export default function SidebarLogin() {
         type="submit"
         onClick={handleLogin}
         disabled={loading}
-        style={{ padding: 8, borderRadius: 6, background: '#30418a', color: '#fff', fontWeight: 600, border: 'none', marginTop: 8, cursor: 'pointer' }}
+        style={{
+          padding: 8,
+          borderRadius: 6,
+          background: (typeof window !== "undefined" && document.body.classList.contains("light-mode")) ? '#30418a' : '#1a237e',
+          color: '#fff',
+          fontWeight: 600,
+          border: 'none',
+          marginTop: 8,
+          cursor: 'pointer'
+        }}
       >
         {loading ? "Einloggen..." : "Login"}
       </button>

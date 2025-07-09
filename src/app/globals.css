@@ -27,8 +27,33 @@ body {
 body.light-mode {
   --background: #fff;
   --foreground: #171717;
-  color: #171717;
+  color: #171717 !important;
   background: #fff;
+}
+
+/* Light Mode - Alle Texte schwarz */
+body.light-mode * {
+  color: #171717 !important;
+}
+
+/* Ausnahmen für spezielle Elemente */
+body.light-mode .sidebar-login button[type="submit"] {
+  color: #2e6a7a !important;
+}
+
+body.light-mode .sidebar-login button[type="button"] {
+  color: #2e6a7a !important;
+}
+
+/* Für Projekt-Karten und andere farbige Elemente */
+body.light-mode .projekt-card,
+body.light-mode .projekt-item {
+  color: #171717 !important;
+}
+
+/* Für Buttons und interaktive Elemente */
+body.light-mode button {
+  color: #171717 !important;
 }
 
 body.light-mode .sidebar-nav {
@@ -38,19 +63,19 @@ body.light-mode .sidebar-nav {
 
 body.light-mode .sidebar-title,
 body.light-mode .sidebar-link {
-  color: #232b5d !important;
+  color: #171717 !important;
   text-shadow: none !important;
 }
 
 body.light-mode .sidebar-link {
   background: linear-gradient(120deg, rgba(30,41,126,0.06) 0%, rgba(80,120,255,0.06) 100%) !important;
-  color: #232b5d !important;
+  color: #171717 !important;
 }
 
 body.light-mode .sidebar-link:hover,
 body.light-mode .sidebar-link:focus {
   background: linear-gradient(120deg, rgba(30,41,126,0.13) 0%, rgba(80,120,255,0.13) 100%) !important;
-  color: #232b5d !important;
+  color: #171717 !important;
 }
 
 body.light-mode input,
@@ -63,7 +88,7 @@ body.light-mode select {
 
 body.light-mode .sidebar-login input,
 body.light-mode .sidebar-login button {
-  color: #232b5d !important;
+  color: #171717 !important;
 }
 
 body.light-mode .sidebar-login button {
@@ -71,13 +96,13 @@ body.light-mode .sidebar-login button {
 }
 
 body.light-mode .sidebar-login button[type="submit"] {
-  background: #232b5d !important;
+  background: #2e6a7a !important;
   color: #fff !important;
 }
 
 body.light-mode .sidebar-login button[type="button"] {
-  background: #b3d8ff !important;
-  color: #232b5d !important;
+  background: #2e6a7a !important;
+  color: #fff !important;
 }
 
 * {

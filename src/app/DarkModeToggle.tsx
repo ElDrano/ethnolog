@@ -10,6 +10,9 @@ export default function DarkModeToggle() {
     }
   }, [darkMode]);
 
+  // Light Mode erkennen
+  const isLight = typeof window !== "undefined" && document.body.classList.contains("light-mode");
+
   return (
     <button
       onClick={() => setDarkMode((d) => !d)}
@@ -18,8 +21,8 @@ export default function DarkModeToggle() {
         top: 24,
         right: 24,
         zIndex: 100,
-        background: darkMode ? '#fff' : '#232b5d',
-        color: darkMode ? '#232b5d' : '#fff',
+        background: isLight ? '#b3d8ff' : '#232b5d',
+        color: isLight ? '#232b5d' : '#fff',
         border: 'none',
         borderRadius: 24,
         padding: '8px 20px',
