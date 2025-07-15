@@ -20,7 +20,6 @@ function ProjekteButton() {
 
   const handleProjekteClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Wenn wir bereits auf /projekte sind, Seite neu laden um zur Übersicht zurückzukehren
     if (pathname === '/projekte') {
       window.location.href = '/projekte';
     } else {
@@ -30,18 +29,22 @@ function ProjekteButton() {
 
   if (!user) return null;
   return (
-    <li style={{ marginTop: 24 }}>
+    <li>
       <button 
         className="sidebar-link" 
         onClick={handleProjekteClick}
-        style={{ 
-          background: 'none', 
-          border: 'none', 
-          color: 'inherit', 
-          font: 'inherit', 
+        style={{
+          width: '100%',
+          textAlign: 'left',
+          background: 'linear-gradient(120deg, rgba(255,255,255,0.10) 0%, rgba(80,120,255,0.10) 100%)',
+          color: '#e3eafe',
+          fontWeight: 500,
+          border: 'none',
+          borderRadius: 10,
+          padding: '0.75rem 1rem',
+          boxShadow: '0 2px 8px 0 rgba(30,40,80,0.10) inset',
+          transition: 'background 0.2s, color 0.2s, box-shadow 0.2s',
           cursor: 'pointer',
-          textDecoration: 'none',
-          padding: 0,
           margin: 0
         }}
       >
@@ -54,10 +57,9 @@ function ProjekteButton() {
 export default function SidebarNav() {
   return (
     <nav className="sidebar-nav">
-      <h2 className="sidebar-title">Ethnografische Methoden</h2>
+      <h2 className="sidebar-title">Ethnographische Methoden</h2>
       <ul className="sidebar-list">
         <li><Link className="sidebar-link" href="/">Startseite</Link></li>
-        <li><Link className="sidebar-link" href="/methode1">Neue ethnographische Forschung</Link></li>
         <ProjekteButton />
       </ul>
       <SidebarLogin />
