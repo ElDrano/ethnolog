@@ -109,7 +109,7 @@ export default function DocumentationForm({
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    const uploadedFiles = [];
+    const uploadedFiles: any[] = [];
 
     try {
       for (let i = 0; i < files.length; i++) {
@@ -182,7 +182,7 @@ export default function DocumentationForm({
       left: 0,
       right: 0,
       bottom: 0,
-      background: '#0008',
+      background: 'rgba(0, 0, 0, 0.5)',
       zIndex: 1000,
       display: 'flex',
       alignItems: 'center',
@@ -190,17 +190,18 @@ export default function DocumentationForm({
       padding: 20
     }}>
       <div style={{
-        background: '#fff',
+        background: 'var(--surface)',
         borderRadius: 12,
         padding: '2rem',
         maxWidth: 800,
         maxHeight: '90vh',
         overflowY: 'auto',
         width: '100%',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+        boxShadow: 'var(--shadow-lg)',
+        border: '1px solid var(--border)'
       }}>
                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-           <h2 style={{ margin: 0, color: '#232b5d' }}>
+           <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>
              {editingDocumentation ? 
                `${documentationType === 'archiv' ? 'Archiv-Dokumentation' : 'Live-Dokumentation'} bearbeiten` :
                `${documentationType === 'archiv' ? 'Archiv-Dokumentation' : 'Live-Dokumentation'} erstellen`
@@ -213,7 +214,7 @@ export default function DocumentationForm({
               border: 'none',
               fontSize: 24,
               cursor: 'pointer',
-              color: '#666'
+              color: 'var(--text-muted)'
             }}
           >
             ×
@@ -223,7 +224,7 @@ export default function DocumentationForm({
         {/* Live-Dokumentation Typ-Auswahl */}
         {documentationType === 'live' && !liveDocumentationType && (
           <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: 12, fontSize: 16 }}>
+            <label style={{ display: 'block', fontWeight: 600, marginBottom: 12, fontSize: 16, color: 'var(--text-primary)' }}>
               Typ der Live-Dokumentation:
             </label>
             <div style={{ display: 'flex', gap: 12 }}>
@@ -232,9 +233,9 @@ export default function DocumentationForm({
                 style={{
                   padding: '12px 20px',
                   borderRadius: 8,
-                  border: '2px solid #2196F3',
-                  background: '#fff',
-                  color: '#2196F3',
+                  border: '2px solid var(--primary-blue)',
+                  background: 'var(--surface)',
+                  color: 'var(--primary-blue)',
                   fontWeight: 600,
                   cursor: 'pointer',
                   fontSize: 14
@@ -247,9 +248,9 @@ export default function DocumentationForm({
                 style={{
                   padding: '12px 20px',
                   borderRadius: 8,
-                  border: '2px solid #2196F3',
-                  background: '#fff',
-                  color: '#2196F3',
+                  border: '2px solid var(--primary-blue)',
+                  background: 'var(--surface)',
+                  color: 'var(--primary-blue)',
                   fontWeight: 600,
                   cursor: 'pointer',
                   fontSize: 14
@@ -262,9 +263,9 @@ export default function DocumentationForm({
                 style={{
                   padding: '12px 20px',
                   borderRadius: 8,
-                  border: '2px solid #2196F3',
-                  background: '#fff',
-                  color: '#2196F3',
+                  border: '2px solid var(--primary-blue)',
+                  background: 'var(--surface)',
+                  color: 'var(--primary-blue)',
                   fontWeight: 600,
                   cursor: 'pointer',
                   fontSize: 14
@@ -281,7 +282,7 @@ export default function DocumentationForm({
             {/* Grunddaten */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
                   Name *
                 </label>
                 <input
@@ -292,8 +293,10 @@ export default function DocumentationForm({
                     width: '100%',
                     padding: 10,
                     borderRadius: 6,
-                    border: '1px solid #ddd',
-                    fontSize: 14
+                    border: '1px solid var(--border)',
+                    fontSize: 14,
+                    background: 'var(--surface)',
+                    color: 'var(--text-primary)'
                   }}
                   placeholder="Name der Dokumentation"
                 />
@@ -310,8 +313,10 @@ export default function DocumentationForm({
                     width: '100%',
                     padding: 10,
                     borderRadius: 6,
-                    border: '1px solid #ddd',
-                    fontSize: 14
+                    border: '1px solid var(--border)',
+                    fontSize: 14,
+                    background: 'var(--surface)',
+                    color: 'var(--text-primary)'
                   }}
                 />
               </div>
@@ -459,8 +464,8 @@ export default function DocumentationForm({
                       style={{
                         padding: '8px 12px',
                         borderRadius: 4,
-                        background: '#4CAF50',
-                        color: '#fff',
+                        background: 'var(--success)',
+                        color: 'white',
                         border: 'none',
                         cursor: 'pointer',
                         fontSize: 12
@@ -479,7 +484,7 @@ export default function DocumentationForm({
                           justifyContent: 'space-between', 
                           alignItems: 'center',
                           padding: 8,
-                          background: '#f5f5f5',
+                          background: 'var(--surface-hover)',
                           borderRadius: 4,
                           marginBottom: 4
                         }}>
@@ -489,8 +494,8 @@ export default function DocumentationForm({
                           <button
                             onClick={() => handleRemovePerson(index)}
                             style={{
-                              background: '#f44336',
-                              color: '#fff',
+                              background: 'var(--error)',
+                              color: 'white',
                               border: 'none',
                               borderRadius: 4,
                               padding: '2px 8px',
@@ -513,7 +518,7 @@ export default function DocumentationForm({
               <>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
+                    <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
                       Interview-Typ
                     </label>
                     <select
@@ -534,7 +539,7 @@ export default function DocumentationForm({
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
+                    <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
                       Interviewpartner
                     </label>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: 8, alignItems: 'end' }}>
@@ -739,7 +744,7 @@ export default function DocumentationForm({
 
             {/* Datei-Upload */}
             <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
                 Dateien hochladen (Fotos, Audio, Video)
               </label>
               <input
@@ -755,7 +760,7 @@ export default function DocumentationForm({
                   fontSize: 14
                 }}
               />
-              {uploading && <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>Upload läuft...</div>}
+              {uploading && <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: 12 }}>Upload läuft...</div>}
               
                              {formData.dateien.length > 0 && (
                  <div style={{ marginTop: 12 }}>
@@ -778,9 +783,9 @@ export default function DocumentationForm({
                 style={{
                   padding: '12px 24px',
                   borderRadius: 6,
-                  border: '1px solid #ddd',
-                  background: '#fff',
-                  color: '#666',
+                  border: '1px solid var(--border)',
+                  background: 'var(--surface)',
+                  color: 'var(--text-secondary)',
                   fontWeight: 600,
                   cursor: 'pointer',
                   fontSize: 14
@@ -794,8 +799,8 @@ export default function DocumentationForm({
                 style={{
                   padding: '12px 24px',
                   borderRadius: 6,
-                  background: '#4CAF50',
-                  color: '#fff',
+                  background: 'var(--success)',
+                  color: 'white',
                   border: 'none',
                   fontWeight: 600,
                   cursor: 'pointer',
