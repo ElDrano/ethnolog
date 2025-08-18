@@ -1,0 +1,39 @@
+/* ===== UTILITY CLASSES ===== */
+
+/* ===== TEXT UTILITIES ===== */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* Theme-specific text utilities */
+body.light-mode .text-primary,
+body.light-mode .text-secondary {
+  color: #000000 !important;
+}
+
+body:not(.light-mode) .text-primary,
+body:not(.light-mode) .text-secondary {
+  color: #ffffff !important;
+}
+
+/* ===== BACKGROUND UTILITIES ===== */
+.bg-primary {
+  background: var(--primary-blue);
+}
+
+.bg-surface {
+  background: var(--surface);
+}
+
+/* ===== BORDER UTILITIES ===== */
+.border-primary {
+  border-color: var(--primary-blue);
+}

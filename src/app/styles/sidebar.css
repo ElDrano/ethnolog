@@ -1,0 +1,84 @@
+.sidebar-nav {
+  width: 220px;
+  background: var(--surface);
+  padding: 2rem 1rem;
+  min-height: 100vh;
+  box-shadow: var(--shadow);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+}
+
+.sidebar-title {
+  margin-bottom: 2rem;
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 14px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.sidebar-link:hover,
+.sidebar-link:focus {
+  background: var(--surface-hover);
+  color: var(--primary-blue);
+  border-color: var(--primary-blue);
+  outline: none;
+  transform: translateX(4px);
+}
+
+.sidebar-link.active {
+  background: var(--primary-blue);
+  color: white;
+  border-color: var(--primary-blue);
+  box-shadow: var(--shadow);
+}
+
+/* Light Mode specific adjustments */
+body.light-mode .sidebar-nav {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+body.light-mode .sidebar-title {
+  color: #000000;
+}
+
+body.light-mode .sidebar-link {
+  color: #000000;
+}
+
+body.light-mode .sidebar-link:hover,
+body.light-mode .sidebar-link:focus {
+  background: var(--surface-hover);
+  color: var(--primary-blue);
+  border-color: var(--primary-blue);
+}
+
+body.light-mode .sidebar-link.active {
+  background: var(--primary-blue);
+  color: white;
+} 

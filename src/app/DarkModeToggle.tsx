@@ -21,18 +21,32 @@ export default function DarkModeToggle() {
         top: 24,
         right: 24,
         zIndex: 100,
-        background: isLight ? '#b3d8ff' : '#232b5d',
-        color: isLight ? '#232b5d' : '#fff',
-        border: 'none',
-        borderRadius: 24,
-        padding: '8px 20px',
-        fontWeight: 600,
-        fontSize: 16,
-        boxShadow: '0 2px 8px #0002',
+        background: isLight ? 'var(--primary-blue)' : 'var(--surface)',
+        color: isLight ? 'white' : 'var(--text-primary)',
+        border: isLight ? 'none' : '1px solid var(--border)',
+        borderRadius: 12,
+        padding: '12px 20px',
+        fontWeight: 500,
+        fontSize: 14,
+        boxShadow: 'var(--shadow)',
         cursor: 'pointer',
-        transition: 'all 0.2s',
+        transition: 'all 0.2s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-1px)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'var(--shadow)';
       }}
     >
+      <span style={{ fontSize: '16px' }}>
+        {darkMode ? '☀️' : '🌙'}
+      </span>
       {darkMode ? 'Light Mode' : 'Dark Mode'}
     </button>
   );
