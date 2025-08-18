@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "./styles/globals.css";
 import Link from "next/link";
-import "./sidebar.css";
+import "./styles/sidebar.css";
 import SidebarNav from "./SidebarNav";
 import DarkModeToggle from "./DarkModeToggle";
 
@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ethnographic Methods",
+  title: "Ethno-Log",
   description: "",
   icons: {
     icon: [

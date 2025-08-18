@@ -59,7 +59,7 @@ export default function SidebarLogin() {
         <div style={{ wordBreak: 'break-all', marginBottom: 8 }}>{user.email}</div>
         <button
           onClick={handleLogout}
-          style={{ padding: 8, borderRadius: 6, background: isLight ? '#f3f3f3' : '#1a237e', color: isLight ? '#232b5d' : '#fff', fontWeight: 600, border: 'none', cursor: 'pointer', marginTop: 0 }}
+          style={{ padding: 8, borderRadius: 6, background: isLight ? '#466692' : '#1a237e', color: isLight ? '#232b5d' : '#fff', fontWeight: 600, border: 'none', cursor: 'pointer', marginTop: 0 }}
           disabled={loading}
         >
           {loading ? "Abmelden..." : "Logout"}
