@@ -604,86 +604,88 @@ export default function ProjektDetail({
               projekt.name
             )}
           </h1>
-          <div style={{ marginBottom: 0 }}>
+          <div style={{ marginTop: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Beschreibung:</h3>
-              <button
-                onClick={() => setOpenDesc({ ...openDesc, [projekt.id]: !openDesc[projekt.id] })}
-                style={{ 
-                  background: 'transparent', 
-                  border: '1px solid #fff', 
-                  color: '#fff', 
-                  borderRadius: 4, 
-                  padding: '2px 8px', 
-                  fontSize: 12, 
-                  cursor: 'pointer',
-                  fontWeight: 600
-                }}
-              >
-                {openDesc[projekt.id] ? '▼' : '▶'}
-              </button>
+              {canEdit && (
+                <button
+                  onClick={() => setOpenDesc({ ...openDesc, [projekt.id]: !openDesc[projekt.id] })}
+                  style={{ 
+                    background: 'transparent', 
+                    border: '1px solid #fff', 
+                    color: '#fff', 
+                    borderRadius: 4, 
+                    padding: '2px 8px', 
+                    fontSize: 12, 
+                    cursor: 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  {openDesc[projekt.id] ? '▼' : '▶'}
+                </button>
+              )}
             </div>
-                         {openDesc[projekt.id] ? (
-               canEdit ? (
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                   <textarea
-                     placeholder="Beschreibung..."
-                     value={editDescs[projekt.id] ?? projekt.beschreibung ?? ""}
-                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditDescs({ ...editDescs, [projekt.id]: e.target.value })}
-                     style={{ 
-                       width: '100%', 
-                       minHeight: 80, 
-                       borderRadius: 6, 
-                       border: '1px solid #fff', 
-                       padding: 8, 
-                       color: 'var(--foreground)', 
-                       fontWeight: 500,
-                       background: 'rgba(255,255,255,0.1)',
-                       fontSize: '0.9rem'
-                     }}
-                   />
-                   <div style={{ display: 'flex', gap: 8 }}>
-                     <button 
-                       onClick={() => handleDescSave(projekt.id)} 
-                       style={{ 
-                         background: '#fff', 
-                         color: '#ff9800', 
-                         border: 'none', 
-                         borderRadius: 5, 
-                         padding: '4px 10px', 
-                         fontWeight: 600, 
-                         cursor: 'pointer' 
-                       }}
-                     >
-                       Speichern
-                     </button>
-                     <button 
-                       onClick={() => {
-                         setEditDescs({ ...editDescs, [projekt.id]: projekt.beschreibung ?? "" });
-                         setOpenDesc({ ...openDesc, [projekt.id]: false });
-                       }} 
-                       style={{ 
-                         background: 'transparent', 
-                         color: '#fff', 
-                         border: '1px solid #fff', 
-                         borderRadius: 5, 
-                         padding: '4px 10px', 
-                         fontWeight: 600, 
-                         cursor: 'pointer' 
-                       }}
-                     >
-                       Abbrechen
-                     </button>
-                   </div>
-                 </div>
-               ) : (
+            {openDesc[projekt.id] ? (
+              canEdit ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <textarea
+                    placeholder="Beschreibung..."
+                    value={editDescs[projekt.id] ?? projekt.beschreibung ?? ""}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditDescs({ ...editDescs, [projekt.id]: e.target.value })}
+                    style={{ 
+                      width: '100%', 
+                      minHeight: 80, 
+                      borderRadius: 6, 
+                      border: '1px solid #fff', 
+                      padding: 8, 
+                      color: '#fff', 
+                      fontWeight: 500,
+                      background: 'rgba(255,255,255,0.1)',
+                      fontSize: '0.9rem'
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button 
+                      onClick={() => handleDescSave(projekt.id)} 
+                      style={{ 
+                        background: '#fff', 
+                        color: '#ff9800', 
+                        border: 'none', 
+                        borderRadius: 5, 
+                        padding: '4px 10px', 
+                        fontWeight: 600, 
+                        cursor: 'pointer' 
+                      }}
+                    >
+                      Speichern
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setEditDescs({ ...editDescs, [projekt.id]: projekt.beschreibung ?? "" });
+                        setOpenDesc({ ...openDesc, [projekt.id]: false });
+                      }} 
+                      style={{ 
+                        background: 'transparent', 
+                        color: '#fff', 
+                        border: '1px solid #fff', 
+                        borderRadius: 5, 
+                        padding: '4px 10px', 
+                        fontWeight: 600, 
+                        cursor: 'pointer' 
+                      }}
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                </div>
+              ) : (
                 <div style={{ 
                   width: '100%', 
                   minHeight: 80, 
                   borderRadius: 6, 
                   border: '1px solid #fff', 
                   padding: 8, 
-                  color: 'var(--foreground)', 
+                  color: '#fff', 
                   fontWeight: 500, 
                   background: 'rgba(255,255,255,0.08)',
                   fontSize: '0.9rem'
@@ -694,12 +696,13 @@ export default function ProjektDetail({
             ) : (
               <div style={{ 
                 fontSize: '0.9rem', 
-                opacity: 0.8, 
+                opacity: 0.9, 
                 fontStyle: 'italic',
-                padding: '4px 0'
+                padding: '8px 0',
+                lineHeight: 1.4
               }}>
                 {projekt.beschreibung ? 
-                  (projekt.beschreibung.length > 100 ? projekt.beschreibung.substring(0, 100) + '...' : projekt.beschreibung) : 
+                  (projekt.beschreibung.length > 200 ? projekt.beschreibung.substring(0, 200) + '...' : projekt.beschreibung) : 
                   '[Keine Beschreibung]'
                 }
               </div>

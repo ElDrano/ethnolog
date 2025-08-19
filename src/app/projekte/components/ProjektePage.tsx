@@ -173,7 +173,7 @@ export default function ProjektePage() {
         ) : (
           <button
             onClick={() => setShowNewProject(true)}
-            style={{ padding: '10px 22px', borderRadius: 8, background: '#f8fafc', color: '#fff', border: 'none', fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px #ff980033' }}
+            className="new-project-btn" style={{ padding: '10px 22px', borderRadius: 8, background: '#f8fafc', color: '#fff', border: 'none', fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px #ff980033' }}
           >
             + Neues Projekt anlegen
           </button>
