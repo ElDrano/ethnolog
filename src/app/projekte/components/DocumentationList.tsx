@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import SecureFileDisplay from './SecureFileDisplay';
 
 interface DocumentationListProps {
   documentations: any[];
@@ -127,32 +128,48 @@ export default function DocumentationList({
             </div>
           )}
           
-          {/* Dateien anzeigen */}
+          {/* Dateien anzeigen - kompakt wenn nicht ausgeklappt */}
           {doc.dateien && doc.dateien.length > 0 && (
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#666', marginBottom: 4 }}>
-                Dateien:
+                Dateien ({doc.dateien.length}):
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                {doc.dateien.map((file: any, index: number) => (
-                  <a
-                    key={index}
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      background: '#e3f2fd',
-                      padding: '2px 6px',
-                      borderRadius: 4,
-                      fontSize: 11,
-                      color: '#1976d2',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    📎 {file.name}
-                  </a>
-                ))}
-              </div>
+              {expandedDocumentations[doc.id] ? (
+                // Vollständige Datei-Vorschau wenn ausgeklappt
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {doc.dateien.map((file: any, index: number) => (
+                    <SecureFileDisplay
+                      key={index}
+                      file={file}
+                    />
+                  ))}
+                </div>
+              ) : (
+                // Kompakte Datei-Liste wenn nicht ausgeklappt
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  {doc.dateien.map((file: any, index: number) => (
+                    <div
+                      key={index}
+                      style={{
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        padding: '4px 8px',
+                        borderRadius: 4,
+                        fontSize: 11,
+                        color: 'var(--text-primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4
+                      }}
+                    >
+                      {file.type.startsWith('image/') ? '🖼️' : 
+                       file.type.startsWith('video/') ? '🎥' : 
+                       file.type.startsWith('audio/') ? '🎵' : '📄'}
+                      {file.name}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

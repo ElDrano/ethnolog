@@ -3,14 +3,13 @@
 :root {
   /* Light Mode Colors */
   --primary-blue: #2563eb;
-  --primary-blue-light: #3b82f6;
   --primary-blue-dark: #1d4ed8;
   --secondary-blue: #dbeafe;
   --accent-blue: #60a5fa;
   
   --background: #ffffff;
-  --surface: #f8fafc;
-  --surface-hover: #f1f5f9;
+  --surface: #f0f8ff;
+  --surface-hover: #e6f3ff;
   --border: #e2e8f0;
   --border-focus: #3b82f6;
   
@@ -29,7 +28,6 @@
 /* Dark Mode Colors */
 body:not(.light-mode) {
   --primary-blue: #3b82f6;
-  --primary-blue-light: #60a5fa;
   --primary-blue-dark: #2563eb;
   --secondary-blue: #1e3a8a;
   --accent-blue: #93c5fd;

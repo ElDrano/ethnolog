@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../supabaseClient';
+import JSZip from 'jszip';
 import CalendarView from "./CalendarView";
 import DocumentationForm from "./DocumentationForm";
 import SecureFileDisplay from "./SecureFileDisplay";
@@ -14,6 +15,7 @@ import DocumentationList from "./DocumentationList";
 import DateRangeFilter from "./DateRangeFilter";
 import PhysicalGatheringForm from "./PhysicalGatheringForm";
 import PhysicalGatheringList from "./PhysicalGatheringList";
+
 
 interface ProjektDetailProps {
   projekt: any;
@@ -92,6 +94,8 @@ export default function ProjektDetail({
   const [expandedDocumentations, setExpandedDocumentations] = useState<{[id:string]: boolean}>({});
   const [documentationFilterCheckboxes, setDocumentationFilterCheckboxes] = useState<{[type:string]: boolean}>({});
   const [editingDocumentation, setEditingDocumentation] = useState<any>(null);
+  const [downloadingFiles, setDownloadingFiles] = useState(false);
+  const [hasFilesInRange, setHasFilesInRange] = useState(false);
   
   // Kalender nach Datumsauswahl minimieren
   const handleDateSelect = (date: string) => {
@@ -193,9 +197,41 @@ export default function ProjektDetail({
     }
   };
 
+  // Prüfen, ob Dateien im ausgewählten Zeitraum vorhanden sind
+  const checkFilesInRange = async () => {
+    if (!startDate || !endDate || !projekt) {
+      setHasFilesInRange(false);
+      return;
+    }
+
+    try {
+      const { data: docsInRange, error } = await supabase
+        .from('documentation')
+        .select('dateien')
+        .eq('projekt_id', projekt.id)
+        .gte('datum', startDate)
+        .lte('datum', endDate);
+
+      if (error) throw error;
+
+      const hasFiles = docsInRange?.some(doc => 
+        doc.dateien && Array.isArray(doc.dateien) && doc.dateien.length > 0
+      ) || false;
+
+      setHasFilesInRange(hasFiles);
+    } catch (error) {
+      console.error('Fehler beim Prüfen der Dateien:', error);
+      setHasFilesInRange(false);
+    }
+  };
+
   useEffect(() => {
     loadDocumentations();
   }, [projekt, selectedDate, startDate, endDate, useDateRange]);
+
+  useEffect(() => {
+    checkFilesInRange();
+  }, [startDate, endDate, projekt]);
 
   useEffect(() => {
     if (!projekt) return;
@@ -288,6 +324,98 @@ export default function ProjektDetail({
     setShowDeleteOptionDialog({opt: null, open: false});
     setDeleteGatheringsLoading(false);
   }
+
+  // Download aller Dateien im ausgewählten Zeitraum
+  const handleDownloadFiles = async () => {
+    if (!startDate || !endDate) return;
+    
+    setDownloadingFiles(true);
+    try {
+      // Alle Dokumentationen im Zeitraum laden
+      const { data: docsInRange, error } = await supabase
+        .from('documentation')
+        .select('*')
+        .eq('projekt_id', projekt.id)
+        .gte('datum', startDate)
+        .lte('datum', endDate);
+
+      if (error) throw error;
+
+      // Alle Dateien sammeln
+      const allFiles: any[] = [];
+      docsInRange?.forEach(doc => {
+        if (doc.dateien && Array.isArray(doc.dateien)) {
+          doc.dateien.forEach((file: any) => {
+            allFiles.push({
+              ...file,
+              documentationName: doc.name,
+              documentationDate: doc.datum
+            });
+          });
+        }
+      });
+
+      if (allFiles.length === 0) {
+        alert('Keine Dateien im ausgewählten Zeitraum gefunden.');
+        return;
+      }
+
+      // ZIP-Datei erstellen
+      const zip = new JSZip();
+      
+      // Dateien herunterladen und zum ZIP hinzufügen
+      for (const file of allFiles) {
+        try {
+          // Signed URL für die Datei generieren
+          const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+            .from('documentation-files')
+            .createSignedUrl(file.fileName, 3600);
+
+          if (signedUrlError) {
+            console.error(`Fehler beim Generieren der Signed URL für ${file.name}:`, signedUrlError);
+            continue;
+          }
+
+          // Datei herunterladen
+          const response = await fetch(signedUrlData.signedUrl);
+          if (!response.ok) {
+            console.error(`Fehler beim Herunterladen von ${file.name}`);
+            continue;
+          }
+
+          const blob = await response.blob();
+          
+          // Dateiname mit Dokumentation-Info erstellen
+          const docDate = new Date(file.documentationDate).toLocaleDateString('de-DE').replace(/\./g, '-');
+          const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const zipFileName = `${docDate}_${file.documentationName}_${safeFileName}`;
+          
+          // Datei zum ZIP hinzufügen
+          zip.file(zipFileName, blob);
+        } catch (fileError) {
+          console.error(`Fehler bei Datei ${file.name}:`, fileError);
+        }
+      }
+
+      // ZIP-Datei generieren und herunterladen
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dateien_${startDate}_bis_${endDate}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      alert(`Erfolgreich ${allFiles.length} Dateien heruntergeladen!`);
+    } catch (error) {
+      console.error('Fehler beim Herunterladen der Dateien:', error);
+      alert('Fehler beim Herunterladen der Dateien. Bitte versuchen Sie es erneut.');
+    } finally {
+      setDownloadingFiles(false);
+    }
+  };
 
   async function handleSaveDocumentation(documentation: any) {
     try {
@@ -430,9 +558,18 @@ export default function ProjektDetail({
        )}
 
                        {/* Projekt-Header - immer oben */}
-        <ProjectInfoCard projekt={projekt} />
+                <ProjectInfoCard 
+          projekt={projekt} 
+          canEdit={canEdit}
+          onNameUpdate={handleNameSave}
+          onDescUpdate={handleDescSave}
+          onDelete={() => setShowDeleteProjectDialog(true)}
+          loading={loading}
+        />
 
-                 {/* Dokumentations-Buttons - immer sichtbar */}
+
+
+                  {/* Dokumentations-Buttons - immer sichtbar */}
          <DocumentationButtons
            onArchivClick={() => {
              setShowNewDocumentation(true);
@@ -449,13 +586,16 @@ export default function ProjektDetail({
                  {/* Datumsbereich-Filter und Dokumentations-Filter und Liste */}
                  {activeOptionTab === 'Start' && (
                    <>
-                     <DateRangeFilter
-                       startDate={startDate}
-                       endDate={endDate}
-                       onStartDateChange={handleStartDateChange}
-                       onEndDateChange={handleEndDateChange}
-                       onClearRange={handleClearDateRange}
-                     />
+                                           <DateRangeFilter
+                        startDate={startDate}
+                        endDate={endDate}
+                        onStartDateChange={handleStartDateChange}
+                        onEndDateChange={handleEndDateChange}
+                        onClearRange={handleClearDateRange}
+                        onDownloadFiles={handleDownloadFiles}
+                        hasFiles={hasFilesInRange}
+                        downloading={downloadingFiles}
+                      />
 
                      <div style={{ marginBottom: 24 }}>
                        {documentations.length > 0 ? (
@@ -475,13 +615,15 @@ export default function ProjektDetail({
                            />
                          </>
                        ) : (
-                         <div style={{ 
+                         <div className="documentation-item" style={{ 
                            padding: '20px', 
                            textAlign: 'center', 
-                           color: '#666',
-                           backgroundColor: '#f8f9fa',
+                           color: 'var(--text-muted)',
+                           background: 'var(--surface)',
+                           border: '1px solid var(--border)',
                            borderRadius: 8,
-                           border: '1px solid #e9ecef'
+                           boxShadow: 'var(--shadow)',
+                           fontStyle: 'italic'
                          }}>
                            {useDateRange && startDate && endDate ? 
                              `Keine Dokumentationen im Zeitraum ${new Date(startDate).toLocaleDateString('de-DE')} - ${new Date(endDate).toLocaleDateString('de-DE')}` :
@@ -513,201 +655,8 @@ export default function ProjektDetail({
 
       {/* Tab-Inhalte */}
       {activeOptionTab === 'Start' && (
-        <div style={{
-          background: 'linear-gradient(90deg, #ff9800 0%, #ffb347 100%)',
-          borderRadius: 12,
-          padding: '0.5rem 1.2rem',
-          color: '#fff',
-          boxShadow: '0 4px 16px #ff980033',
-          marginBottom: 24
-        }}>
-          <h1 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: 0, display: 'flex', alignItems: 'center', gap: 12, minHeight: 36 }}>
-            {canEdit ? (
-              editStates[projekt.id] ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <input
-                    type="text"
-                    value={editNames[projekt.id] ?? projekt.name ?? ""}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditNames({ ...editNames, [projekt.id]: e.target.value })}
-                    style={{ 
-                      padding: 6, 
-                      borderRadius: 5, 
-                      border: '1px solid #fff', 
-                      minWidth: 160, 
-                      fontWeight: 600,
-                      fontSize: '1.1rem',
-                      background: 'rgba(255,255,255,0.1)',
-                      color: 'var(--foreground)'
-                    }}
-                  />
-                  <button 
-                    onClick={() => handleNameSave(projekt.id)} 
-                    style={{ 
-                      background: '#fff', 
-                      color: '#ff9800', 
-                      border: 'none', 
-                      borderRadius: 5, 
-                      padding: '4px 10px', 
-                      fontWeight: 600, 
-                      cursor: 'pointer' 
-                    }}
-                  >
-                    Speichern
-                  </button>
-                  <button 
-                    onClick={() => setEditStates({ ...editStates, [projekt.id]: false })} 
-                    style={{ 
-                      background: 'transparent', 
-                      color: '#fff', 
-                      border: '1px solid #fff', 
-                      borderRadius: 5, 
-                      padding: '4px 10px', 
-                      fontWeight: 600, 
-                      cursor: 'pointer' 
-                    }}
-                  >
-                    Abbrechen
-                  </button>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span>{projekt.name}</span>
-                  <button 
-                    onClick={() => setEditStates({ ...editStates, [projekt.id]: true })} 
-                    style={{ 
-                      background: '#fff', 
-                      color: '#ff9800', 
-                      border: 'none', 
-                      borderRadius: 5, 
-                      padding: '4px 10px', 
-                      fontWeight: 600, 
-                      cursor: 'pointer' 
-                    }}
-                  >
-                    Bearbeiten
-                  </button>
-                                     <button
-                     onClick={() => setShowDeleteProjectDialog(true)}
-                     style={{ padding: '4px 10px', borderRadius: 5, background: '#b00', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
-                     disabled={loading}
-                   >
-                     Löschen
-                   </button>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginLeft: 16, fontSize: 12, color: '#fff', opacity: 0.85, fontWeight: 400 }}>
-                    <span>Erstellt: {projekt.created_at ? new Date(projekt.created_at).toLocaleDateString() : "-"}</span>
-                    {projekt.updated_at && <span>Letzte Änderung: {new Date(projekt.updated_at).toLocaleDateString()}</span>}
-                    {projekt.arbeitsweise && <span>Arbeitsweise: {projekt.arbeitsweise === 'vor_ort' ? 'Vor Ort' : projekt.arbeitsweise === 'hybrid' ? 'Hybrid' : 'Nur remote'}</span>}
-                  </div>
-                </div>
-              )
-            ) : (
-              projekt.name
-            )}
-          </h1>
-          <div style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Beschreibung:</h3>
-              {canEdit && (
-                <button
-                  onClick={() => setOpenDesc({ ...openDesc, [projekt.id]: !openDesc[projekt.id] })}
-                  style={{ 
-                    background: 'transparent', 
-                    border: '1px solid #fff', 
-                    color: '#fff', 
-                    borderRadius: 4, 
-                    padding: '2px 8px', 
-                    fontSize: 12, 
-                    cursor: 'pointer',
-                    fontWeight: 600
-                  }}
-                >
-                  {openDesc[projekt.id] ? '▼' : '▶'}
-                </button>
-              )}
-            </div>
-            {openDesc[projekt.id] ? (
-              canEdit ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <textarea
-                    placeholder="Beschreibung..."
-                    value={editDescs[projekt.id] ?? projekt.beschreibung ?? ""}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditDescs({ ...editDescs, [projekt.id]: e.target.value })}
-                    style={{ 
-                      width: '100%', 
-                      minHeight: 80, 
-                      borderRadius: 6, 
-                      border: '1px solid #fff', 
-                      padding: 8, 
-                      color: '#fff', 
-                      fontWeight: 500,
-                      background: 'rgba(255,255,255,0.1)',
-                      fontSize: '0.9rem'
-                    }}
-                  />
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button 
-                      onClick={() => handleDescSave(projekt.id)} 
-                      style={{ 
-                        background: '#fff', 
-                        color: '#ff9800', 
-                        border: 'none', 
-                        borderRadius: 5, 
-                        padding: '4px 10px', 
-                        fontWeight: 600, 
-                        cursor: 'pointer' 
-                      }}
-                    >
-                      Speichern
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setEditDescs({ ...editDescs, [projekt.id]: projekt.beschreibung ?? "" });
-                        setOpenDesc({ ...openDesc, [projekt.id]: false });
-                      }} 
-                      style={{ 
-                        background: 'transparent', 
-                        color: '#fff', 
-                        border: '1px solid #fff', 
-                        borderRadius: 5, 
-                        padding: '4px 10px', 
-                        fontWeight: 600, 
-                        cursor: 'pointer' 
-                      }}
-                    >
-                      Abbrechen
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ 
-                  width: '100%', 
-                  minHeight: 80, 
-                  borderRadius: 6, 
-                  border: '1px solid #fff', 
-                  padding: 8, 
-                  color: '#fff', 
-                  fontWeight: 500, 
-                  background: 'rgba(255,255,255,0.08)',
-                  fontSize: '0.9rem'
-                }}>
-                  {projekt.beschreibung || <span style={{ opacity: 0.6 }}>[Keine Beschreibung]</span>}
-                </div>
-              )
-            ) : (
-              <div style={{ 
-                fontSize: '0.9rem', 
-                opacity: 0.9, 
-                fontStyle: 'italic',
-                padding: '8px 0',
-                lineHeight: 1.4
-              }}>
-                {projekt.beschreibung ? 
-                  (projekt.beschreibung.length > 200 ? projekt.beschreibung.substring(0, 200) + '...' : projekt.beschreibung) : 
-                  '[Keine Beschreibung]'
-                }
-              </div>
-            )}
-          </div>
+        <div>
+          {/* Projekt-Details werden jetzt über ProjectInfoCard angezeigt */}
         </div>
       )}
 

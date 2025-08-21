@@ -3,6 +3,10 @@ import React, { useMemo } from "react";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
+// Dark Mode CSS Variables
+const isDarkMode = typeof window !== 'undefined' && 
+  document.documentElement.classList.contains('dark');
+
 interface CalendarViewProps {
   gatherings: any[];
   selectedDate: string; // YYYY-MM-DD
@@ -63,13 +67,13 @@ export default function CalendarView({ gatherings, selectedDate, onChangeSelecte
     <div style={{ 
       maxWidth: 280, 
       fontSize: '0.9rem',
-      '--calendar-border': 'var(--border)',
+      '--calendar-border': isDarkMode ? '#4a5568' : 'var(--border)',
       '--calendar-selected': 'var(--primary-blue)',
-      '--calendar-hover': 'var(--surface-hover)',
-      '--calendar-background': 'var(--surface)',
-      '--calendar-text': 'var(--text-primary)',
-      '--calendar-text-secondary': 'var(--text-secondary)',
-      '--calendar-text-muted': 'var(--text-muted)'
+      '--calendar-hover': isDarkMode ? '#4a5568' : 'var(--surface-hover)',
+      '--calendar-background': isDarkMode ? '#2d3748' : 'var(--surface)',
+      '--calendar-text': isDarkMode ? '#e2e8f0' : 'var(--text-primary)',
+      '--calendar-text-secondary': isDarkMode ? '#a0aec0' : 'var(--text-secondary)',
+      '--calendar-text-muted': isDarkMode ? '#718096' : 'var(--text-muted)'
     } as React.CSSProperties}>
       <Calendar
         value={selectedDateObj}
@@ -124,7 +128,7 @@ export default function CalendarView({ gatherings, selectedDate, onChangeSelecte
         }
         
         :global(.react-calendar__tile--now) {
-          background: var(--surface-hover);
+          background: var(--calendar-hover);
           color: var(--calendar-text);
           border: 1px solid var(--primary-blue);
         }

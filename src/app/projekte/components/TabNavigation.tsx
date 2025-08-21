@@ -1,6 +1,10 @@
 "use client";
 import React from 'react';
 
+// Dark Mode CSS Variables
+const isDarkMode = typeof window !== 'undefined' && 
+  document.documentElement.classList.contains('dark');
+
 interface TabNavigationProps {
   optionTabs: string[];
   activeOptionTab: string | null;
@@ -31,9 +35,9 @@ export default function TabNavigation({
               style={{
                 padding: '8px 18px',
                 borderRadius: 8,
-                border: isActive ? '2px solid #ff9800' : '1.5px solid #bbb',
-                background: isActive ? '#ff9800' : '#f5f5f5',
-                color: isActive ? '#fff' : '#232b5d',
+                border: isActive ? '2px solid #ff9800' : (isDarkMode ? '1.5px solid #4a5568' : '1.5px solid #bbb'),
+                background: isActive ? '#ff9800' : (isDarkMode ? '#2d3748' : '#f5f5f5'),
+                color: isActive ? '#fff' : (isDarkMode ? '#e2e8f0' : '#232b5d'),
                 fontWeight: 600,
                 fontSize: 15,
                 cursor: 'pointer',
@@ -51,7 +55,7 @@ export default function TabNavigation({
                   position: 'absolute',
                   top: 2,
                   right: -32,
-                  background: '#fff',
+                  background: isDarkMode ? '#2d3748' : '#fff',
                   color: '#b00',
                   border: '1.5px solid #b00',
                   borderRadius: 6,
@@ -75,9 +79,9 @@ export default function TabNavigation({
           style={{
             padding: '8px 12px',
             borderRadius: 8,
-            border: showCalendar ? '2px solid #3a4a8c' : '1.5px solid #bbb',
-            background: showCalendar ? '#3a4a8c' : '#f5f5f5',
-            color: showCalendar ? '#fff' : '#232b5d',
+            border: showCalendar ? '2px solid #3a4a8c' : (isDarkMode ? '1.5px solid #4a5568' : '1.5px solid #bbb'),
+            background: showCalendar ? '#3a4a8c' : (isDarkMode ? '#2d3748' : '#f5f5f5'),
+            color: showCalendar ? '#fff' : (isDarkMode ? '#e2e8f0' : '#232b5d'),
             fontWeight: 600,
             fontSize: 14,
             cursor: 'pointer',
