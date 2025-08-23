@@ -66,7 +66,7 @@ Neue professionelle Farbpalette mit Blautönen als Hauptfarbe, die sich durch be
   --secondary-blue: #dbeafe;
   --accent-blue: #60a5fa;
   
-  --background: #ffffff;
+  --background:rgb(255, 255, 255);
   --surface: #f8fafc;
   --surface-hover: #f1f5f9;
   --border: #e2e8f0;

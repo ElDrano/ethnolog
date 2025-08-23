@@ -63,6 +63,19 @@ export default function ProjektePage() {
     });
   }, [user]);
 
+  // Event Listener für Navigation zur Projektliste
+  useEffect(() => {
+    const handleResetToProjekteList = () => {
+      setSelectedProjekt(null);
+    };
+
+    window.addEventListener('resetToProjekteList', handleResetToProjekteList);
+    
+    return () => {
+      window.removeEventListener('resetToProjekteList', handleResetToProjekteList);
+    };
+  }, []);
+
   async function handleDelete(id: string) {
     setLoading(true);
     setError("");

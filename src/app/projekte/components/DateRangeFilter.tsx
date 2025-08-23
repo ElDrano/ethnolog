@@ -8,8 +8,14 @@ interface DateRangeFilterProps {
   onEndDateChange: (date: string) => void;
   onClearRange: () => void;
   onDownloadFiles?: () => void;
+  onExportWord?: () => void;
+  onExportPDF?: () => void;
   hasFiles?: boolean;
+  hasDocumentations?: boolean;
   downloading?: boolean;
+  exportingWord?: boolean;
+  exportingPDF?: boolean;
+  projektCreatedAt?: string; // Neues Feld für Projekterstellungsdatum
 }
 
 export default function DateRangeFilter({
@@ -19,11 +25,31 @@ export default function DateRangeFilter({
   onEndDateChange,
   onClearRange,
   onDownloadFiles,
+  onExportWord,
+  onExportPDF,
   hasFiles = false,
-  downloading = false
+  hasDocumentations = false,
+  downloading = false,
+  exportingWord = false,
+  exportingPDF = false,
+  projektCreatedAt
 }: DateRangeFilterProps) {
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
+
+  // Funktion für gesamten Projektzeitraum
+  const handleFullProjectRange = () => {
+    if (projektCreatedAt) {
+      const today = new Date();
+      const todayString = today.toISOString().split('T')[0];
+      // Projekterstellungsdatum als Startdatum verwenden
+      const projectStartDate = projektCreatedAt.split('T')[0];
+      
+      // Beide Datumsänderungen auf einmal durchführen
+      onStartDateChange(projectStartDate);
+      onEndDateChange(todayString);
+    }
+  };
 
   // Dark Mode CSS Variables
   const isDarkMode = typeof window !== 'undefined' && 
@@ -358,6 +384,36 @@ export default function DateRangeFilter({
         />
       </div>
 
+      {projektCreatedAt && (
+        <button
+          onClick={handleFullProjectRange}
+          style={{
+            background: 'var(--primary-orange)',
+            color: 'white',
+            border: '1px solid var(--primary-orange)',
+            borderRadius: 6,
+            padding: '6px 12px',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--primary-orange-hover)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'var(--primary-orange)';
+          }}
+          title="Gesamten Projektzeitraum (von Projekterstellung bis heute) auswählen"
+        >
+          <span style={{ fontSize: 16 }}>📊</span>
+          Gesamter Zeitraum
+        </button>
+      )}
+
       <button
         onClick={onClearRange}
         style={{
@@ -409,6 +465,72 @@ export default function DateRangeFilter({
             <>
               <span style={{ fontSize: 16 }}>📁</span>
               Alle Dateien herunterladen
+            </>
+          )}
+        </button>
+      )}
+
+      {onExportWord && startDate && endDate && hasDocumentations && (
+        <button
+          onClick={onExportWord}
+          disabled={exportingWord}
+          style={{
+            background: exportingWord ? 'var(--text-muted)' : 'var(--primary-green)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 6,
+            padding: '8px 16px',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: exportingWord ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+        >
+          {exportingWord ? (
+            <>
+              <span style={{ fontSize: 16 }}>⏳</span>
+              Exportiere Word...
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: 16 }}>📄</span>
+              Word-Dokumentation exportieren
+            </>
+          )}
+        </button>
+      )}
+
+      {onExportPDF && startDate && endDate && hasDocumentations && (
+        <button
+          onClick={onExportPDF}
+          disabled={exportingPDF}
+          style={{
+            background: exportingPDF ? 'var(--text-muted)' : 'var(--primary-purple)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 6,
+            padding: '8px 16px',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: exportingPDF ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+        >
+          {exportingPDF ? (
+            <>
+              <span style={{ fontSize: 16 }}>⏳</span>
+              Exportiere PDF...
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: 16 }}>📄</span>
+              PDF-Dokumentation exportieren
             </>
           )}
         </button>
