@@ -63,6 +63,19 @@ export default function ProjektePage() {
     });
   }, [user]);
 
+  // Event Listener für Navigation zur Projektliste
+  useEffect(() => {
+    const handleResetToProjekteList = () => {
+      setSelectedProjekt(null);
+    };
+
+    window.addEventListener('resetToProjekteList', handleResetToProjekteList);
+    
+    return () => {
+      window.removeEventListener('resetToProjekteList', handleResetToProjekteList);
+    };
+  }, []);
+
   async function handleDelete(id: string) {
     setLoading(true);
     setError("");
@@ -173,7 +186,7 @@ export default function ProjektePage() {
         ) : (
           <button
             onClick={() => setShowNewProject(true)}
-            style={{ padding: '10px 22px', borderRadius: 8, background: '#f8fafc', color: '#fff', border: 'none', fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px #ff980033' }}
+            className="new-project-btn" style={{ padding: '10px 22px', borderRadius: 8, background: '#f8fafc', color: '#fff', border: 'none', fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px #ff980033' }}
           >
             + Neues Projekt anlegen
           </button>

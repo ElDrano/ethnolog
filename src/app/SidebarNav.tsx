@@ -17,9 +17,17 @@ function ProjekteButton() {
 
   if (!user) return null;
   
+  const handleProjekteClick = () => {
+    // Wenn wir auf einem Projekt sind, zur Listenansicht zurückkehren
+    if (window.location.pathname === '/projekte') {
+      // Event an die ProjektePage senden, um selectedProjekt zurückzusetzen
+      window.dispatchEvent(new CustomEvent('resetToProjekteList'));
+    }
+  };
+  
   return (
     <li>
-      <Link className="sidebar-link" href="/projekte">
+      <Link className="sidebar-link" href="/projekte" onClick={handleProjekteClick}>
         Projekte
       </Link>
     </li>

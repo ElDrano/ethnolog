@@ -62,12 +62,11 @@ Neue professionelle Farbpalette mit Blautönen als Hauptfarbe, die sich durch be
 :root {
   /* Light Mode */
   --primary-blue: #2563eb;
-  --primary-blue-light: #3b82f6;
   --primary-blue-dark: #1d4ed8;
   --secondary-blue: #dbeafe;
   --accent-blue: #60a5fa;
   
-  --background: #ffffff;
+  --background:rgb(255, 255, 255);
   --surface: #f8fafc;
   --surface-hover: #f1f5f9;
   --border: #e2e8f0;
@@ -81,7 +80,6 @@ Neue professionelle Farbpalette mit Blautönen als Hauptfarbe, die sich durch be
 body:not(.light-mode) {
   /* Dark Mode */
   --primary-blue: #3b82f6;
-  --primary-blue-light: #60a5fa;
   --primary-blue-dark: #2563eb;
   --secondary-blue: #1e3a8a;
   --accent-blue: #93c5fd;

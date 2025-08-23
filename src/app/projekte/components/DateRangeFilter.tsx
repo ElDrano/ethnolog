@@ -7,6 +7,15 @@ interface DateRangeFilterProps {
   onStartDateChange: (date: string) => void;
   onEndDateChange: (date: string) => void;
   onClearRange: () => void;
+  onDownloadFiles?: () => void;
+  onExportWord?: () => void;
+  onExportPDF?: () => void;
+  hasFiles?: boolean;
+  hasDocumentations?: boolean;
+  downloading?: boolean;
+  exportingWord?: boolean;
+  exportingPDF?: boolean;
+  projektCreatedAt?: string; // Neues Feld für Projekterstellungsdatum
 }
 
 export default function DateRangeFilter({
@@ -14,75 +23,37 @@ export default function DateRangeFilter({
   endDate,
   onStartDateChange,
   onEndDateChange,
-  onClearRange
+  onClearRange,
+  onDownloadFiles,
+  onExportWord,
+  onExportPDF,
+  hasFiles = false,
+  hasDocumentations = false,
+  downloading = false,
+  exportingWord = false,
+  exportingPDF = false,
+  projektCreatedAt
 }: DateRangeFilterProps) {
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
 
+  // Funktion für gesamten Projektzeitraum
+  const handleFullProjectRange = () => {
+    if (projektCreatedAt) {
+      const today = new Date();
+      const todayString = today.toISOString().split('T')[0];
+      // Projekterstellungsdatum als Startdatum verwenden
+      const projectStartDate = projektCreatedAt.split('T')[0];
+      
+      // Beide Datumsänderungen auf einmal durchführen
+      onStartDateChange(projectStartDate);
+      onEndDateChange(todayString);
+    }
+  };
+
   // Dark Mode CSS Variables
   const isDarkMode = typeof window !== 'undefined' && 
     document.documentElement.classList.contains('dark');
-
-  const containerStyle = {
-    display: 'flex' as const,
-    gap: 12,
-    marginBottom: 16,
-    alignItems: 'center' as const,
-    padding: '12px 16px',
-    backgroundColor: isDarkMode ? '#2d3748' : '#f8f9fa',
-    borderRadius: 8,
-    border: `1px solid ${isDarkMode ? '#4a5568' : '#e9ecef'}`
-  };
-
-  const labelStyle = {
-    fontSize: 14,
-    fontWeight: 600,
-    color: isDarkMode ? '#e2e8f0' : '#495057'
-  };
-
-  const subLabelStyle = {
-    fontSize: 12,
-    color: isDarkMode ? '#a0aec0' : '#6c757d'
-  };
-
-  const inputStyle = {
-    padding: '6px 10px',
-    border: `1px solid ${isDarkMode ? '#4a5568' : '#ced4da'}`,
-    borderRadius: 4,
-    fontSize: 14,
-    backgroundColor: isDarkMode ? '#1a202c' : '#fff',
-    color: isDarkMode ? '#e2e8f0' : '#495057',
-    cursor: 'pointer'
-  };
-
-  const buttonStyle = {
-    padding: '6px 12px',
-    border: '1px solid #dc3545',
-    borderRadius: 4,
-    backgroundColor: isDarkMode ? '#2d3748' : '#fff',
-    color: '#dc3545',
-    cursor: 'pointer' as const,
-    fontSize: 12,
-    fontWeight: 600
-  };
-
-  const infoStyle = {
-    fontSize: 12,
-    color: isDarkMode ? '#a0aec0' : '#6c757d',
-    marginLeft: 'auto' as const,
-    fontStyle: 'italic' as const
-  };
-
-  const calendarButtonStyle = {
-    padding: '4px 8px',
-    border: `1px solid ${isDarkMode ? '#4a5568' : '#ced4da'}`,
-    borderRadius: 4,
-    backgroundColor: isDarkMode ? '#1a202c' : '#fff',
-    color: isDarkMode ? '#e2e8f0' : '#495057',
-    cursor: 'pointer' as const,
-    fontSize: 12,
-    marginLeft: 4
-  };
 
   // Einfache Kalender-Komponente
   const SimpleCalendar = ({ 
@@ -98,9 +69,9 @@ export default function DateRangeFilter({
   }) => {
     if (!isVisible) return null;
 
-         const today = new Date();
-     const currentMonth = selectedDate ? new Date(selectedDate) : today;
-     const [displayMonth, setDisplayMonth] = useState(currentMonth);
+    const today = new Date();
+    const currentMonth = selectedDate ? new Date(selectedDate) : today;
+    const [displayMonth, setDisplayMonth] = useState(currentMonth);
 
     const getDaysInMonth = (date: Date) => {
       const year = date.getFullYear();
@@ -135,71 +106,71 @@ export default function DateRangeFilter({
       'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
     ];
 
-         return (
-       <div style={{
-         position: 'absolute' as const,
-         top: '100%',
-         left: 0,
-         zIndex: 1000,
-         backgroundColor: isDarkMode ? '#2d3748' : '#fff',
-         border: `1px solid ${isDarkMode ? '#4a5568' : '#ced4da'}`,
-         borderRadius: 8,
-         padding: 12,
-         boxShadow: isDarkMode ? '0 4px 12px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.15)',
-         minWidth: 280
-       }}>
+    return (
+      <div style={{
+        position: 'absolute' as const,
+        top: '100%',
+        left: 0,
+        zIndex: 1000,
+        backgroundColor: isDarkMode ? '#2d3748' : '#fff',
+        border: `1px solid ${isDarkMode ? '#4a5568' : '#ced4da'}`,
+        borderRadius: 8,
+        padding: 12,
+        boxShadow: isDarkMode ? '0 4px 12px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.15)',
+        minWidth: 280
+      }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: 12
         }}>
-                     <button
-             onClick={() => setDisplayMonth(new Date(displayMonth.getFullYear(), displayMonth.getMonth() - 1))}
-             style={{
-               background: 'none',
-               border: 'none',
-               color: isDarkMode ? '#e2e8f0' : '#495057',
-               cursor: 'pointer',
-               fontSize: 16,
-               padding: '4px 8px',
-               borderRadius: 4
-             }}
-             onMouseEnter={(e) => {
-               e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
-             }}
-             onMouseLeave={(e) => {
-               e.currentTarget.style.backgroundColor = 'transparent';
-             }}
-           >
-             ‹
-           </button>
-           <span style={{
-             fontWeight: 600,
-             color: isDarkMode ? '#e2e8f0' : '#495057'
-           }}>
-             {monthNames[displayMonth.getMonth()]} {displayMonth.getFullYear()}
-           </span>
-           <button
-             onClick={() => setDisplayMonth(new Date(displayMonth.getFullYear(), displayMonth.getMonth() + 1))}
-             style={{
-               background: 'none',
-               border: 'none',
-               color: isDarkMode ? '#e2e8f0' : '#495057',
-               cursor: 'pointer',
-               fontSize: 16,
-               padding: '4px 8px',
-               borderRadius: 4
-             }}
-             onMouseEnter={(e) => {
-               e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
-             }}
-             onMouseLeave={(e) => {
-               e.currentTarget.style.backgroundColor = 'transparent';
-             }}
-           >
-             ›
-           </button>
+          <button
+            onClick={() => setDisplayMonth(new Date(displayMonth.getFullYear(), displayMonth.getMonth() - 1))}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: isDarkMode ? '#e2e8f0' : '#495057',
+              cursor: 'pointer',
+              fontSize: 16,
+              padding: '4px 8px',
+              borderRadius: 4
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            ‹
+          </button>
+          <span style={{
+            fontWeight: 600,
+            color: isDarkMode ? '#e2e8f0' : '#495057'
+          }}>
+            {monthNames[displayMonth.getMonth()]} {displayMonth.getFullYear()}
+          </span>
+          <button
+            onClick={() => setDisplayMonth(new Date(displayMonth.getFullYear(), displayMonth.getMonth() + 1))}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: isDarkMode ? '#e2e8f0' : '#495057',
+              cursor: 'pointer',
+              fontSize: 16,
+              padding: '4px 8px',
+              borderRadius: 4
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            ›
+          </button>
         </div>
 
         <div style={{
@@ -226,118 +197,139 @@ export default function DateRangeFilter({
           gridTemplateColumns: 'repeat(7, 1fr)',
           gap: 4
         }}>
-                     {days.map((day, index) => (
-             <button
-               key={index}
-               onClick={() => {
-                 if (day) {
-                   onDateSelect(formatDate(day));
-                   onClose();
-                 }
-               }}
-               disabled={!day}
-               style={{
-                 background: day ? (formatDate(day) === selectedDate ? '#ff9800' : 'transparent') : 'transparent',
-                 border: 'none',
-                 borderRadius: 4,
-                 padding: '8px 4px',
-                 cursor: day ? 'pointer' : 'default',
-                 color: day ? (formatDate(day) === selectedDate ? '#fff' : (isDarkMode ? '#e2e8f0' : '#495057')) : 'transparent',
-                 fontSize: 14,
-                 fontWeight: day && formatDate(day) === selectedDate ? 600 : 400
-               }}
-               onMouseEnter={(e) => {
-                 if (day && formatDate(day) !== selectedDate) {
-                   e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
-                 }
-               }}
-               onMouseLeave={(e) => {
-                 if (day && formatDate(day) !== selectedDate) {
-                   e.currentTarget.style.backgroundColor = 'transparent';
-                 }
-               }}
-             >
-               {day ? day.getDate() : ''}
-             </button>
-           ))}
+          {days.map((day, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                if (day) {
+                  onDateSelect(formatDate(day));
+                  onClose();
+                }
+              }}
+              disabled={!day}
+              style={{
+                background: day ? (formatDate(day) === selectedDate ? '#ff9800' : 'transparent') : 'transparent',
+                border: 'none',
+                borderRadius: 4,
+                padding: '8px 4px',
+                cursor: day ? 'pointer' : 'default',
+                color: day ? (formatDate(day) === selectedDate ? '#fff' : (isDarkMode ? '#e2e8f0' : '#495057')) : 'transparent',
+                fontSize: 14,
+                fontWeight: day && formatDate(day) === selectedDate ? 600 : 400
+              }}
+              onMouseEnter={(e) => {
+                if (day && formatDate(day) !== selectedDate) {
+                  e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (day && formatDate(day) !== selectedDate) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
+            >
+              {day ? day.getDate() : ''}
+            </button>
+          ))}
         </div>
 
-                 <div style={{
-           display: 'flex',
-           justifyContent: 'space-between',
-           marginTop: 12,
-           paddingTop: 8,
-           borderTop: `1px solid ${isDarkMode ? '#4a5568' : '#e9ecef'}`
-         }}>
-           <button
-             onClick={() => {
-               onDateSelect(formatDate(today));
-               onClose();
-             }}
-             style={{
-               background: 'none',
-               border: 'none',
-               color: '#ff9800',
-               cursor: 'pointer',
-               fontSize: 12,
-               fontWeight: 600,
-               padding: '4px 8px',
-               borderRadius: 4
-             }}
-             onMouseEnter={(e) => {
-               e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
-             }}
-             onMouseLeave={(e) => {
-               e.currentTarget.style.backgroundColor = 'transparent';
-             }}
-           >
-             Heute
-           </button>
-           <button
-             onClick={onClose}
-             style={{
-               background: 'none',
-               border: 'none',
-               color: isDarkMode ? '#a0aec0' : '#6c757d',
-               cursor: 'pointer',
-               fontSize: 12,
-               padding: '4px 8px',
-               borderRadius: 4
-             }}
-             onMouseEnter={(e) => {
-               e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
-             }}
-             onMouseLeave={(e) => {
-               e.currentTarget.style.backgroundColor = 'transparent';
-             }}
-           >
-             Schließen
-           </button>
-         </div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginTop: 12,
+          paddingTop: 8,
+          borderTop: `1px solid ${isDarkMode ? '#4a5568' : '#e9ecef'}`
+        }}>
+          <button
+            onClick={() => {
+              onDateSelect(formatDate(today));
+              onClose();
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#ff9800',
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: 600,
+              padding: '4px 8px',
+              borderRadius: 4
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            Heute
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: isDarkMode ? '#a0aec0' : '#6c757d',
+              cursor: 'pointer',
+              fontSize: 12,
+              padding: '4px 8px',
+              borderRadius: 4
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#4a5568' : '#f8f9fa';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            Schließen
+          </button>
+        </div>
       </div>
     );
   };
-
   return (
-    <div style={containerStyle}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <label style={labelStyle}>
-          📅 Datumsbereich:
+    <div style={{
+      background: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: 8,
+      padding: 16,
+      marginBottom: 16,
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: 12,
+      alignItems: 'center'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
+        <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+          Von:
         </label>
-      </div>
-      
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' as const }}>
-        <label style={subLabelStyle}>Von:</label>
         <input
           type="date"
           value={startDate}
           onChange={(e) => onStartDateChange(e.target.value)}
-          style={inputStyle}
+          style={{
+            padding: '6px 12px',
+            borderRadius: 6,
+            border: '1px solid var(--border)',
+            fontSize: 14,
+            background: 'var(--background)',
+            color: 'var(--text-primary)'
+          }}
           readOnly
         />
         <button
           onClick={() => setShowStartCalendar(!showStartCalendar)}
-          style={calendarButtonStyle}
+          style={{
+            padding: '6px 8px',
+            border: '1px solid var(--border)',
+            borderRadius: 6,
+            background: isDarkMode ? 'var(--background)' : '#e2e8f0',
+            color: isDarkMode ? 'var(--text-primary)' : '#374151',
+            cursor: 'pointer',
+            fontSize: 14,
+            marginLeft: 4
+          }}
           title="Kalender öffnen"
         >
           📅
@@ -349,19 +341,37 @@ export default function DateRangeFilter({
           isVisible={showStartCalendar}
         />
       </div>
-      
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' as const }}>
-        <label style={subLabelStyle}>Bis:</label>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
+        <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+          Bis:
+        </label>
         <input
           type="date"
           value={endDate}
           onChange={(e) => onEndDateChange(e.target.value)}
-          style={inputStyle}
+          style={{
+            padding: '6px 12px',
+            borderRadius: 6,
+            border: '1px solid var(--border)',
+            fontSize: 14,
+            background: 'var(--background)',
+            color: 'var(--text-primary)'
+          }}
           readOnly
         />
         <button
           onClick={() => setShowEndCalendar(!showEndCalendar)}
-          style={calendarButtonStyle}
+          style={{
+            padding: '6px 8px',
+            border: '1px solid var(--border)',
+            borderRadius: 6,
+            background: isDarkMode ? 'var(--background)' : '#e2e8f0',
+            color: isDarkMode ? 'var(--text-primary)' : '#374151',
+            cursor: 'pointer',
+            fontSize: 14,
+            marginLeft: 4
+          }}
           title="Kalender öffnen"
         >
           📅
@@ -373,21 +383,158 @@ export default function DateRangeFilter({
           isVisible={showEndCalendar}
         />
       </div>
-      
+
+      {projektCreatedAt && (
+        <button
+          onClick={handleFullProjectRange}
+          style={{
+            background: 'var(--primary-orange)',
+            color: 'white',
+            border: '1px solid var(--primary-orange)',
+            borderRadius: 6,
+            padding: '6px 12px',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--primary-orange-hover)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'var(--primary-orange)';
+          }}
+          title="Gesamten Projektzeitraum (von Projekterstellung bis heute) auswählen"
+        >
+          <span style={{ fontSize: 16 }}>📊</span>
+          Gesamter Zeitraum
+        </button>
+      )}
+
       <button
         onClick={onClearRange}
-        style={buttonStyle}
-        title="Datumsbereich zurücksetzen"
+        style={{
+          background: 'var(--surface)',
+          color: 'var(--text-primary)',
+          border: '1px solid var(--border)',
+          borderRadius: 6,
+          padding: '6px 12px',
+          fontSize: 14,
+          fontWeight: 600,
+          cursor: 'pointer',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'var(--surface-hover)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'var(--surface)';
+        }}
       >
         Zurücksetzen
       </button>
-      
-      <div style={infoStyle}>
-        {startDate && endDate ? 
-          `${new Date(startDate).toLocaleDateString('de-DE')} - ${new Date(endDate).toLocaleDateString('de-DE')}` : 
-          'Alle Dokumentationen anzeigen'
-        }
-      </div>
+
+      {onDownloadFiles && startDate && endDate && hasFiles && (
+        <button
+          onClick={onDownloadFiles}
+          disabled={downloading}
+          style={{
+            background: downloading ? 'var(--text-muted)' : 'var(--primary-blue)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 6,
+            padding: '8px 16px',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: downloading ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+        >
+          {downloading ? (
+            <>
+              <span style={{ fontSize: 16 }}>⏳</span>
+              Lade herunter...
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: 16 }}>📁</span>
+              Alle Dateien herunterladen
+            </>
+          )}
+        </button>
+      )}
+
+      {onExportWord && startDate && endDate && hasDocumentations && (
+        <button
+          onClick={onExportWord}
+          disabled={exportingWord}
+          style={{
+            background: exportingWord ? 'var(--text-muted)' : 'var(--primary-green)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 6,
+            padding: '8px 16px',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: exportingWord ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+        >
+          {exportingWord ? (
+            <>
+              <span style={{ fontSize: 16 }}>⏳</span>
+              Exportiere Word...
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: 16 }}>📄</span>
+              Word-Dokumentation exportieren
+            </>
+          )}
+        </button>
+      )}
+
+      {onExportPDF && startDate && endDate && hasDocumentations && (
+        <button
+          onClick={onExportPDF}
+          disabled={exportingPDF}
+          style={{
+            background: exportingPDF ? 'var(--text-muted)' : 'var(--primary-purple)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 6,
+            padding: '8px 16px',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: exportingPDF ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+        >
+          {exportingPDF ? (
+            <>
+              <span style={{ fontSize: 16 }}>⏳</span>
+              Exportiere PDF...
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: 16 }}>📄</span>
+              PDF-Dokumentation exportieren
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }

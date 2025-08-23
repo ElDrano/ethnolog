@@ -1,10 +1,10 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 
 interface DocumentationFiltersProps {
   documentations: any[];
   activeDocumentationFilters: string[];
-  onFilterChange: (filters: string[]) => void;
+  onFilterChange: (filters: string[], showAll: boolean) => void;
 }
 
 export default function DocumentationFilters({
@@ -12,16 +12,21 @@ export default function DocumentationFilters({
   activeDocumentationFilters,
   onFilterChange
 }: DocumentationFiltersProps) {
+  const [showAll, setShowAll] = useState(activeDocumentationFilters.length === 0);
+
   const handleFilterToggle = (filterType: string) => {
+    setShowAll(false); // Wenn ein spezifischer Filter gewählt wird, "Alle" deaktivieren
     if (activeDocumentationFilters.includes(filterType)) {
-      onFilterChange(activeDocumentationFilters.filter(f => f !== filterType));
+      onFilterChange(activeDocumentationFilters.filter(f => f !== filterType), false);
     } else {
-      onFilterChange([...activeDocumentationFilters, filterType]);
+      onFilterChange([...activeDocumentationFilters, filterType], false);
     }
   };
 
   const handleShowAll = () => {
-    onFilterChange([]);
+    const newShowAll = !showAll;
+    setShowAll(newShowAll);
+    onFilterChange([], newShowAll);
   };
 
   return (
@@ -30,16 +35,16 @@ export default function DocumentationFilters({
       <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
         <input
           type="checkbox"
-          checked={activeDocumentationFilters.length === 0}
+          checked={showAll}
           onChange={handleShowAll}
           style={{ transform: 'scale(1.2)' }}
         />
         <span style={{ 
           padding: '6px 12px',
           borderRadius: 6,
-          border: activeDocumentationFilters.length === 0 ? '2px solid #ff9800' : '1px solid #ddd',
-          background: activeDocumentationFilters.length === 0 ? '#ff9800' : '#fff',
-          color: activeDocumentationFilters.length === 0 ? '#fff' : '#666',
+          border: showAll ? '2px solid #ff9800' : '1px solid #ddd',
+          background: showAll ? '#ff9800' : '#fff',
+          color: showAll ? '#fff' : '#666',
           fontWeight: 600,
           fontSize: 12
         }}>

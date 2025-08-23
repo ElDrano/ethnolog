@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 
 export default function DarkModeToggle() {
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
