@@ -13,6 +13,7 @@ interface DocumentationListProps {
   selectedDocumentations: string[];
   onToggleDocumentationSelection: (docId: string) => void;
   onSelectAllDocumentations: (selectAll: boolean) => void;
+  selectedTags: string[];
 }
 
 export default function DocumentationList({
@@ -25,10 +26,19 @@ export default function DocumentationList({
   onDeleteDocumentation,
   selectedDocumentations,
   onToggleDocumentationSelection,
-  onSelectAllDocumentations
+  onSelectAllDocumentations,
+  selectedTags
 }: DocumentationListProps) {
   const filteredDocumentations = documentations.filter(doc => {
-    if (showAll) return true; // Wenn "Alle" explizit aktiviert ist
+    if (showAll) {
+      // Wenn "Alle" aktiviert ist, nur Tag-Filter anwenden
+      if (selectedTags.length === 0) return true;
+      
+      // Tag-Filter anwenden
+      if (!doc.tags || !Array.isArray(doc.tags)) return false;
+      return selectedTags.every(tag => doc.tags.includes(tag));
+    }
+    
     if (activeDocumentationFilters.length === 0) return false; // Wenn keine Filter aktiv sind, nichts anzeigen
     
     // Prüfen ob Archiv ausgewählt ist
@@ -41,10 +51,19 @@ export default function DocumentationList({
     );
     const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
     
-    // Dokumentation anzeigen wenn:
-    // - Archiv ausgewählt UND es ist eine Archiv-Dokumentation
-    // - Live-Typ ausgewählt UND es ist eine passende Live-Dokumentation
-    return (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
+    // Typ-Filter prüfen
+    const passesTypeFilter = (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
+    
+    // Tag-Filter prüfen
+    if (selectedTags.length === 0) {
+      return passesTypeFilter;
+    }
+    
+    if (!doc.tags || !Array.isArray(doc.tags)) return false;
+    const passesTagFilter = selectedTags.every(tag => doc.tags.includes(tag));
+    
+    // Beide Filter müssen passen
+    return passesTypeFilter && passesTagFilter;
   });
 
   const allFilteredSelected = filteredDocumentations.length > 0 && 
@@ -138,6 +157,26 @@ export default function DocumentationList({
                    doc.untertyp === 'fieldnote' ? 'Feldnotiz' : 'Dokumentation'} • {new Date(doc.datum).toLocaleDateString('de-DE')}
                   {doc.startzeit && doc.endzeit && ` • ${doc.startzeit} - ${doc.endzeit}`}
                 </div>
+                
+                {doc.tags && Array.isArray(doc.tags) && doc.tags.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                    {doc.tags.map((tag: string, index: number) => (
+                      <span
+                        key={index}
+                        style={{
+                          padding: '2px 6px',
+                          background: 'var(--primary-blue)',
+                          color: 'white',
+                          borderRadius: 8,
+                          fontSize: '0.7rem',
+                          fontWeight: 600
+                        }}
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               
               <div style={{ display: 'flex', gap: 8 }}>
@@ -193,6 +232,29 @@ export default function DocumentationList({
                 {doc.beschreibung && (
                   <div style={{ marginBottom: 12 }}>
                     <strong>Beschreibung:</strong> {doc.beschreibung}
+                  </div>
+                )}
+
+                {doc.tags && Array.isArray(doc.tags) && doc.tags.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <strong>Tags:</strong>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                      {doc.tags.map((tag: string, index: number) => (
+                        <span
+                          key={index}
+                          style={{
+                            padding: '4px 8px',
+                            background: 'var(--primary-blue)',
+                            color: 'white',
+                            borderRadius: 12,
+                            fontSize: '0.8rem',
+                            fontWeight: 600
+                          }}
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
 

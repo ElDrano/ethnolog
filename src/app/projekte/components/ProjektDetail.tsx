@@ -18,6 +18,7 @@ import DocumentationList from "./DocumentationList";
 import DateRangeFilter from "./DateRangeFilter";
 import PhysicalGatheringForm from "./PhysicalGatheringForm";
 import PhysicalGatheringList from "./PhysicalGatheringList";
+import TagFilter from "./TagFilter";
 
 
 interface ProjektDetailProps {
@@ -103,6 +104,7 @@ export default function ProjektDetail({
   const [exportingWord, setExportingWord] = useState(false);
   const [exportingPDF, setExportingPDF] = useState(false);
   const [selectedDocumentations, setSelectedDocumentations] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
   // Kalender nach Datumsauswahl minimieren
   const handleDateSelect = (date: string) => {
@@ -1313,7 +1315,8 @@ export default function ProjektDetail({
         personen: documentation.personen || [],
         dialoge: documentation.dialoge || [],
         kernfragen: documentation.kernfragen || [],
-        dateien: documentation.dateien || []
+        dateien: documentation.dateien || [],
+        tags: documentation.tags || []
       };
 
       let error;
@@ -1482,7 +1485,14 @@ export default function ProjektDetail({
                              activeDocumentationFilters={activeDocumentationFilters}
                              onFilterChange={handleFilterChange}
                            />
-                                                       <DocumentationList
+                           
+                           <TagFilter
+                             documentations={documentations}
+                             onFilterChange={setSelectedTags}
+                             selectedTags={selectedTags}
+                           />
+                           
+                           <DocumentationList
                               documentations={documentations}
                               activeDocumentationFilters={activeDocumentationFilters}
                               showAll={showAll}
@@ -1493,6 +1503,7 @@ export default function ProjektDetail({
                               selectedDocumentations={selectedDocumentations}
                               onToggleDocumentationSelection={handleToggleDocumentationSelection}
                               onSelectAllDocumentations={handleSelectAllDocumentations}
+                              selectedTags={selectedTags}
                             />
                          </>
                        ) : (

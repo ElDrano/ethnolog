@@ -39,7 +39,8 @@ export default function DocumentationForm({
          kernfragen: editingDocumentation.kernfragen && editingDocumentation.kernfragen.length > 0 ? editingDocumentation.kernfragen : [{ frage: '', antwort: '' }],
          dateien: editingDocumentation.dateien || [],
          meetingTyp: editingDocumentation.meeting_typ || '',
-         interviewTyp: editingDocumentation.interview_typ || ''
+         interviewTyp: editingDocumentation.interview_typ || '',
+         tags: editingDocumentation.tags || []
        };
      }
      return {
@@ -54,11 +55,13 @@ export default function DocumentationForm({
        klient: '',
        dialoge: [{ text: '' }],
        kernfragen: [{ frage: '', antwort: '' }],
-       dateien: []
+       dateien: [],
+       tags: []
      };
   });
   const [newPerson, setNewPerson] = useState({ vorname: '', nachname: '', email: '', position: '' });
   const [uploading, setUploading] = useState(false);
+  const [newTag, setNewTag] = useState('');
 
   const handleAddPerson = () => {
     if (!newPerson.nachname.trim()) return;
@@ -101,6 +104,25 @@ export default function DocumentationForm({
     setFormData((prev: any) => ({
       ...prev,
       kernfragen: prev.kernfragen.filter((_: any, i: number) => i !== index)
+    }));
+  };
+
+  const handleAddTag = () => {
+    if (!newTag.trim()) return;
+    const tag = newTag.trim();
+    if (!formData.tags.includes(tag)) {
+      setFormData((prev: any) => ({
+        ...prev,
+        tags: [...prev.tags, tag]
+      }));
+    }
+    setNewTag('');
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      tags: prev.tags.filter((tag: string) => tag !== tagToRemove)
     }));
   };
 
@@ -170,7 +192,8 @@ export default function DocumentationForm({
     const finalData = {
       ...formData,
       projekt_id: projekt.id,
-      untertyp: liveDocumentationType
+      untertyp: liveDocumentationType,
+      tags: formData.tags || []
     };
     await onSave(finalData);
   };
@@ -340,6 +363,87 @@ export default function DocumentationForm({
                 }}
                 placeholder="Beschreibung der Dokumentation..."
               />
+            </div>
+
+            {/* Tags */}
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
+                Tags
+              </label>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+                <input
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+                  style={{
+                    flex: 1,
+                    padding: 8,
+                    borderRadius: 4,
+                    border: '1px solid #ddd',
+                    fontSize: 14
+                  }}
+                  placeholder="Tag eingeben und Enter drücken..."
+                />
+                <button
+                  onClick={handleAddTag}
+                  disabled={!newTag.trim()}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: 4,
+                    background: 'var(--primary-blue)',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    fontWeight: 600
+                  }}
+                >
+                  +
+                </button>
+              </div>
+              
+              {formData.tags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {formData.tags.map((tag: string, index: number) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '6px 12px',
+                        background: 'var(--primary-blue)',
+                        color: 'white',
+                        borderRadius: 20,
+                        fontSize: 12,
+                        fontWeight: 600
+                      }}
+                    >
+                      <span>#{tag}</span>
+                      <button
+                        onClick={() => handleRemoveTag(tag)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontSize: 14,
+                          fontWeight: 'bold',
+                          padding: 0,
+                          width: 16,
+                          height: 16,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
