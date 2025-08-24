@@ -46,18 +46,43 @@ export default function ProjektePage() {
       // Eigene Projekte
       supabase
         .from("projekte")
-        .select("id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise")
+        .select("id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise, organization_id")
         .eq("user_id", user.id),
       // Geteilte Projekte
       supabase
         .from("projekt_user")
-        .select("projekt_id, role, projekte:projekt_id(id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise)")
+        .select("projekt_id, role, projekte:projekt_id(id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise, organization_id)")
+        .eq("user_id", user.id),
+      // Organisationsprojekte
+      supabase
+        .from("organization_members")
+        .select(`
+          organization_id,
+          organizations:organization_id(
+            id,
+            name,
+            projekte:projekte(id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise, organization_id)
+          )
+        `)
         .eq("user_id", user.id)
-    ]).then(([ownRes, sharedRes]) => {
+    ]).then(([ownRes, sharedRes, orgRes]) => {
       let own = ownRes.data || [];
       let shared = (sharedRes.data || []).map((pu: any) => pu.projekte).filter(Boolean);
-      // Duplikate entfernen (falls man Owner und geteilter Nutzer ist)
-      const all = [...own, ...shared].filter((p, i, arr) => p && arr.findIndex(x => x.id === p.id) === i);
+      
+      // Organisationsprojekte extrahieren
+      let orgProjects: any[] = [];
+      if (orgRes.data) {
+        orgRes.data.forEach((orgMember: any) => {
+          if (orgMember.organizations?.projekte) {
+            orgProjects = orgProjects.concat(orgMember.organizations.projekte);
+          }
+        });
+      }
+      
+      // Alle Projekte zusammenführen und Duplikate entfernen
+      const all = [...own, ...shared, ...orgProjects].filter((p, i, arr) => 
+        p && arr.findIndex(x => x.id === p.id) === i
+      );
       setProjekte(all);
       setLoading(false);
     });
@@ -98,6 +123,7 @@ export default function ProjektePage() {
         beschreibung: projectData.beschreibung,
         user_id: user.id,
         arbeitsweise: projectData.arbeitsweise,
+        organization_id: projectData.organization_id,
         optionen: projectData.optionen
       })
       .select()
@@ -186,7 +212,7 @@ export default function ProjektePage() {
         ) : (
           <button
             onClick={() => setShowNewProject(true)}
-            className="new-project-btn" style={{ padding: '10px 22px', borderRadius: 8, background: '#f8fafc', color: '#fff', border: 'none', fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px #ff980033' }}
+            className="new-project-btn" style={{ padding: '10px 22px', borderRadius: 8, background: 'var(--button)', color: 'var(--text-primary)', border: 'none', fontWeight: 700, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s ease' }}
           >
             + Neues Projekt anlegen
           </button>

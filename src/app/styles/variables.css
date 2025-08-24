@@ -8,8 +8,8 @@
   --accent-blue: #60a5fa;
   
   --background: #ffffff;
-  --surface: #f0f8ff;
-  --surface-hover: #e6f3ff;
+  --surface: #d1e7ff;
+  --surface-hover: #b3d8ff;
   --border: #e2e8f0;
   --border-focus: #3b82f6;
   
@@ -18,6 +18,10 @@
   --text-muted: #94a3b8;
   --foreground: #000000;
   --button: #466692;
+  --primary-orange: #f97316;
+  --primary-orange-hover: #ea580c;
+  --primary-green: #10b981;
+  --primary-purple: #8b5cf6;
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
@@ -44,6 +48,10 @@ body:not(.light-mode) {
   --text-muted: #94a3b8;
   --foreground: #ffffff;
   --button: #466692;
+  --primary-orange: #f97316;
+  --primary-orange-hover: #ea580c;
+  --primary-green: #10b981;
+  --primary-purple: #8b5cf6;
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;

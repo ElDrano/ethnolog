@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import OrganizationSelector from './OrganizationSelector';
 
 interface NewProjectFormProps {
   user: any;
@@ -21,6 +22,7 @@ export default function NewProjectForm({
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectMode, setNewProjectMode] = useState("");
   const [editDescs, setEditDescs] = useState<{[id:string]: string}>({ new: '' });
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<string | null>(null);
 
   async function handleCreateProject() {
     if (!newProjectName.trim()) return;
@@ -30,7 +32,8 @@ export default function NewProjectForm({
       beschreibung: editDescs['new'] ?? '',
       arbeitsweise: newProjectMode,
       optionen: [],
-      personen: []
+      personen: [],
+      organization_id: selectedOrganizationId
     };
 
     await onCreateProject(projectData);
@@ -139,7 +142,12 @@ export default function NewProjectForm({
         </select>
       </div>
 
-      
+      {/* Organisation */}
+      <OrganizationSelector
+        selectedOrganizationId={selectedOrganizationId}
+        onOrganizationChange={setSelectedOrganizationId}
+        user={user}
+      />
 
       {createError && (
         <div style={{ 

@@ -11,7 +11,7 @@ import SecureFileDisplay from "./SecureFileDisplay";
 import ProjectInfoCard from "./ProjectInfoCard";
 import DeleteProjectDialog from "./DeleteProjectDialog";
 import DeleteOptionDialog from "./DeleteOptionDialog";
-import TabNavigation from "./TabNavigation";
+
 import DocumentationButtons from "./DocumentationButtons";
 import DocumentationFilters from "./DocumentationFilters";
 import DocumentationList from "./DocumentationList";
@@ -47,7 +47,7 @@ export default function ProjektDetail({
   const [projektUsers, setProjektUsers] = useState<{[id:string]: any[]}>({});
   const [emailSuggestions, setEmailSuggestions] = useState<{[id:string]: any[]}>({});
   const [showSuggestions, setShowSuggestions] = useState<{[id:string]: boolean}>({});
-  const [activeOptionTab, setActiveOptionTab] = useState<string | null>(null);
+
   const [showDeleteOptionDialog, setShowDeleteOptionDialog] = useState<{opt: string | null, open: boolean}>({opt: null, open: false});
   const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false);
   const [personenProjekt, setPersonenProjekt] = useState<any[]>([]);
@@ -124,14 +124,7 @@ export default function ProjektDetail({
   const sharedEntry = projektUsers[projekt.id]?.find(u => u.user_id === user.id);
   const canEdit = isOwner || (sharedEntry && sharedEntry.role === 'write');
 
-  // Tabs: Start + alle Optionen (Kalender ist separat umschaltbar)
-  const optionTabs = ['Start', ...(Array.isArray(projekt.optionen) ? projekt.optionen : [])];
 
-  useEffect(() => {
-    if (projekt) {
-      setActiveOptionTab('Start');
-    }
-  }, [projekt]);
 
   // Dokumentationen laden
   const loadDocumentations = async () => {
@@ -302,17 +295,42 @@ export default function ProjektDetail({
 
 
 
-  async function handleNameSave(id: string) {
-    const newName = editNames[id];
-    const { error } = await supabase.from("projekte").update({ name: newName }).eq("id", id);
-    if (!error) {
-      setEditStates({ ...editStates, [id]: false });
+  async function handleNameSave(id: string, newName: string) {
+    try {
+      const { error } = await supabase.from("projekte").update({ name: newName }).eq("id", id);
+      if (error) {
+        console.error('Fehler beim Speichern des Namens:', error);
+        alert('Fehler beim Speichern des Namens: ' + error.message);
+        return;
+      }
+      
+      // Projekt-Objekt aktualisieren
+      projekt.name = newName;
+      
+      alert('Projektname erfolgreich gespeichert!');
+    } catch (error) {
+      console.error('Fehler beim Speichern des Namens:', error);
+      alert('Fehler beim Speichern des Namens');
     }
   }
 
-  async function handleDescSave(id: string) {
-    const newDesc = editDescs[id];
-    const { error } = await supabase.from("projekte").update({ beschreibung: newDesc }).eq("id", id);
+  async function handleDescSave(id: string, newDesc: string) {
+    try {
+      const { error } = await supabase.from("projekte").update({ beschreibung: newDesc }).eq("id", id);
+      if (error) {
+        console.error('Fehler beim Speichern der Beschreibung:', error);
+        alert('Fehler beim Speichern der Beschreibung: ' + error.message);
+        return;
+      }
+      
+      // Projekt-Objekt aktualisieren
+      projekt.beschreibung = newDesc;
+      
+      alert('Projektbeschreibung erfolgreich gespeichert!');
+    } catch (error) {
+      console.error('Fehler beim Speichern der Beschreibung:', error);
+      alert('Fehler beim Speichern der Beschreibung');
+    }
   }
 
 
@@ -475,26 +493,31 @@ export default function ProjektDetail({
         return;
       }
 
-      // Dokumentationen nach aktuellen Filtern filtern
-      const filteredDocs = docsInRange.filter(doc => {
-        if (showAll) return true; // Wenn "Alle" explizit aktiviert ist
-        if (activeDocumentationFilters.length === 0) return false; // Wenn keine Filter aktiv sind, nichts anzeigen
-        
-        // Prüfen ob Archiv ausgewählt ist
-        const isArchivSelected = activeDocumentationFilters.includes('archiv');
-        const isArchivDoc = doc.typ === 'archiv';
-        
-        // Prüfen ob Live-Dokumentationstypen ausgewählt sind
-        const isLiveTypeSelected = activeDocumentationFilters.some(filter => 
-          filter === 'meeting' || filter === 'interview' || filter === 'fieldnote'
-        );
-        const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
-        
-        // Dokumentation anzeigen wenn:
-        // - Archiv ausgewählt UND es ist eine Archiv-Dokumentation
-        // - Live-Typ ausgewählt UND es ist eine passende Live-Dokumentation
-        return (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
-      });
+             // Dokumentationen nach aktuellen Filtern filtern
+       let filteredDocs = docsInRange.filter(doc => {
+         if (showAll) return true; // Wenn "Alle" explizit aktiviert ist
+         if (activeDocumentationFilters.length === 0) return false; // Wenn keine Filter aktiv sind, nichts anzeigen
+         
+         // Prüfen ob Archiv ausgewählt ist
+         const isArchivSelected = activeDocumentationFilters.includes('archiv');
+         const isArchivDoc = doc.typ === 'archiv';
+         
+         // Prüfen ob Live-Dokumentationstypen ausgewählt sind
+         const isLiveTypeSelected = activeDocumentationFilters.some(filter => 
+           filter === 'meeting' || filter === 'interview' || filter === 'fieldnote'
+         );
+         const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
+         
+         // Dokumentation anzeigen wenn:
+         // - Archiv ausgewählt UND es ist eine Archiv-Dokumentation
+         // - Live-Typ ausgewählt UND es ist eine passende Live-Dokumentation
+         return (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
+       });
+
+       // Wenn spezifische Dokumentationen ausgewählt sind, nur diese verwenden
+       if (selectedDocumentations.length > 0) {
+         filteredDocs = filteredDocs.filter(doc => selectedDocumentations.includes(doc.id));
+       }
 
       if (filteredDocs.length === 0) {
         alert('Keine Dokumentationen mit den aktuellen Filtern im ausgewählten Zeitraum gefunden.');
@@ -1291,6 +1314,7 @@ export default function ProjektDetail({
         onClick={onBack}
         style={{
           background: 'var(--button)',
+          color: 'var(--text-primary)',
           borderRadius: 8,
           padding: '8px 16px',
           marginBottom: 24,
@@ -1298,26 +1322,15 @@ export default function ProjektDetail({
           fontWeight: 600,
           display: 'flex',
           alignItems: 'center',
-          gap: 8
+          gap: 8,
+          border: 'none',
+          transition: 'all 0.2s ease'
         }}
       >
         ←
       </button>
 
-      {/* Tabs-Leiste + Kalender-Toggle */}
-      <TabNavigation
-        optionTabs={optionTabs}
-        activeOptionTab={activeOptionTab}
-        showCalendar={false}
-        selectedDate={selectedDate}
-        onTabChange={setActiveOptionTab}
-        onCalendarToggle={() => {}}
-        onDeleteOption={(opt) => setShowDeleteOptionDialog({opt, open: true})}
-      />
-
-
-
-                       {/* Projekt-Header - immer oben */}
+      {/* Projekt-Header - immer oben */}
                 <ProjectInfoCard 
           projekt={projekt} 
           canEdit={canEdit}
@@ -1344,8 +1357,6 @@ export default function ProjektDetail({
          />
 
                  {/* Datumsbereich-Filter und Dokumentations-Filter und Liste */}
-                 {activeOptionTab === 'Start' && (
-                   <>
                                                                                           <DateRangeFilter
                           startDate={startDate}
                           endDate={endDate}
@@ -1353,13 +1364,8 @@ export default function ProjektDetail({
                           onEndDateChange={handleEndDateChange}
                           onClearRange={handleClearDateRange}
                           onDownloadFiles={handleDownloadFiles}
-                          onExportWord={handleExportWord}
-                          onExportPDF={handleExportPDF}
                           hasFiles={hasFilesInRange}
-                          hasDocumentations={documentations.length > 0}
                           downloading={downloadingFiles}
-                          exportingWord={exportingWord}
-                          exportingPDF={exportingPDF}
                           projektCreatedAt={projekt.created_at}
                         />
 
@@ -1370,6 +1376,10 @@ export default function ProjektDetail({
                              documentations={documentations}
                              activeDocumentationFilters={activeDocumentationFilters}
                              onFilterChange={handleFilterChange}
+                             onExportWord={handleExportWord}
+                             onExportPDF={handleExportPDF}
+                             exportingWord={exportingWord}
+                             exportingPDF={exportingPDF}
                            />
                            
                            <TagFilter
@@ -1410,8 +1420,6 @@ export default function ProjektDetail({
                          </div>
                        )}
                      </div>
-                   </>
-                 )}
 
                      {/* Dialog für Projekt löschen */}
         <DeleteProjectDialog
@@ -1430,12 +1438,10 @@ export default function ProjektDetail({
           onClose={() => setShowDeleteOptionDialog({ opt: null, open: false })}
         />
 
-      {/* Tab-Inhalte */}
-      {activeOptionTab === 'Start' && (
+             {/* Tab-Inhalte */}
         <div>
           {/* Projekt-Details werden jetzt über ProjectInfoCard angezeigt */}
         </div>
-      )}
 
                 {/* Dokumentations-Formular */}
          {showNewDocumentation && (
