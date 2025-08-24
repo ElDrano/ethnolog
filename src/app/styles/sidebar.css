@@ -64,7 +64,7 @@ body.light-mode .sidebar-nav {
 }
 
 body.light-mode .sidebar-title {
-  color: #000000;
+  color: var(--text-primary);
 }
 
 body.light-mode .sidebar-link {

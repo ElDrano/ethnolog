@@ -54,12 +54,12 @@ export default function SidebarLogin() {
     // Light Mode erkennen
     const isLight = typeof window !== "undefined" && document.body.classList.contains("light-mode");
     return (
-      <div style={{ marginTop: 32, width: '100%', color: '#e3eafe', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ marginTop: 32, width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>Eingeloggt als:</div>
         <div style={{ wordBreak: 'break-all', marginBottom: 8 }}>{user.email}</div>
         <button
           onClick={handleLogout}
-          style={{ padding: 8, borderRadius: 6, background: isLight ? '#466692' : '#1a237e', color: isLight ? '#232b5d' : '#fff', fontWeight: 600, border: 'none', cursor: 'pointer', marginTop: 0 }}
+          className="logout-button"
           disabled={loading}
         >
           {loading ? "Abmelden..." : "Logout"}
@@ -76,7 +76,6 @@ export default function SidebarLogin() {
         value={email}
         onChange={e => setEmail(e.target.value)}
         required
-        style={{ padding: 8, borderRadius: 6, border: '1px solid #b3c7ff', background: '#232b5d', color: '#e3eafe' }}
       />
       <input
         type="password"
@@ -84,22 +83,11 @@ export default function SidebarLogin() {
         value={password}
         onChange={e => setPassword(e.target.value)}
         required
-        style={{ padding: 8, borderRadius: 6, border: '1px solid #b3c7ff', background: '#232b5d', color: '#e3eafe' }}
       />
       <button
         type="submit"
         onClick={handleLogin}
         disabled={loading}
-        style={{
-          padding: 8,
-          borderRadius: 6,
-          background: (typeof window !== "undefined" && document.body.classList.contains("light-mode")) ? '#30418a' : '#1a237e',
-          color: '#fff',
-          fontWeight: 600,
-          border: 'none',
-          marginTop: 8,
-          cursor: 'pointer'
-        }}
       >
         {loading ? "Einloggen..." : "Login"}
       </button>
@@ -107,12 +95,11 @@ export default function SidebarLogin() {
         type="button"
         onClick={handleRegister}
         disabled={loading}
-        style={{ padding: 8, borderRadius: 6, background: '#1a237e', color: '#fff', fontWeight: 600, border: 'none', marginTop: 0, cursor: 'pointer' }}
       >
         {loading ? "Bitte warten..." : "Registrieren"}
       </button>
-      {error && <div style={{ color: '#ffb4b4', marginTop: 8 }}>{error}</div>}
-      {success && <div style={{ color: '#b4ffb4', marginTop: 8 }}>{success}</div>}
+      {error && <div className="login-error">{error}</div>}
+      {success && <div className="login-success">{success}</div>}
     </form>
   );
 } 

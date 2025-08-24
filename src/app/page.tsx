@@ -20,14 +20,13 @@ export default function Home() {
         alignItems: 'center',
         gap: '2rem',
         marginTop: '4rem',
-        color: 'red',
         textShadow: '0 2px 12px rgba(0,0,0,0.1)',
       }}>
         
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 700 }}>Willkommen bei Ethno-Log</h1>
+        <h1 className="homepage-title">Willkommen bei Ethno-Log</h1>
         
         
-        <p style={{ fontSize: '1.2rem', maxWidth: 600, textAlign: 'center', color: 'var(--foreground)'  }}>
+        <p className="homepage-subtitle">
           Diese Webseite bietet dir praktische Tools und Anleitungen, um ethnographische Methoden einfach und digital umzusetzen.
         </p>
 
