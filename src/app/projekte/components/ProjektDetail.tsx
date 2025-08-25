@@ -5,19 +5,18 @@ import JSZip from 'jszip';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, ImageRun, ExternalHyperlink } from 'docx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import CalendarView from "./CalendarView";
+
 import DocumentationForm from "./DocumentationForm";
 import SecureFileDisplay from "./SecureFileDisplay";
 import ProjectInfoCard from "./ProjectInfoCard";
 import DeleteProjectDialog from "./DeleteProjectDialog";
 import DeleteOptionDialog from "./DeleteOptionDialog";
-import TabNavigation from "./TabNavigation";
+
 import DocumentationButtons from "./DocumentationButtons";
 import DocumentationFilters from "./DocumentationFilters";
 import DocumentationList from "./DocumentationList";
 import DateRangeFilter from "./DateRangeFilter";
-import PhysicalGatheringForm from "./PhysicalGatheringForm";
-import PhysicalGatheringList from "./PhysicalGatheringList";
+
 import TagFilter from "./TagFilter";
 
 
@@ -48,20 +47,8 @@ export default function ProjektDetail({
   const [projektUsers, setProjektUsers] = useState<{[id:string]: any[]}>({});
   const [emailSuggestions, setEmailSuggestions] = useState<{[id:string]: any[]}>({});
   const [showSuggestions, setShowSuggestions] = useState<{[id:string]: boolean}>({});
-  const [activeOptionTab, setActiveOptionTab] = useState<string | null>(null);
-  const [gatherings, setGatherings] = useState<any[]>([]);
-  const [gatheringForm, setGatheringForm] = useState<any>({
-    datum: '',
-    startzeit: '',
-    endzeit: '',
-    beschreibung: '',
-    personen_ids: [],
-    dialoge: [{ text: '', imageUrl: '' }],
-  });
-  const [gatheringLoading, setGatheringLoading] = useState(false);
-  const [gatheringError, setGatheringError] = useState('');
+
   const [showDeleteOptionDialog, setShowDeleteOptionDialog] = useState<{opt: string | null, open: boolean}>({opt: null, open: false});
-  const [deleteGatheringsLoading, setDeleteGatheringsLoading] = useState(false);
   const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false);
   const [personenProjekt, setPersonenProjekt] = useState<any[]>([]);
   const [showNewDocumentation, setShowNewDocumentation] = useState(false);
@@ -91,7 +78,7 @@ export default function ProjektDetail({
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [useDateRange, setUseDateRange] = useState<boolean>(false);
-  const [showCalendar, setShowCalendar] = useState<boolean>(false);
+
   const [documentations, setDocumentations] = useState<any[]>([]);
   const [activeDocumentationFilters, setActiveDocumentationFilters] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(true); // Initial "Alle" aktiviert
@@ -109,7 +96,7 @@ export default function ProjektDetail({
   // Kalender nach Datumsauswahl minimieren
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
-    setShowCalendar(false);
+    
   };
 
   // Datumsbereich Handler
@@ -137,14 +124,7 @@ export default function ProjektDetail({
   const sharedEntry = projektUsers[projekt.id]?.find(u => u.user_id === user.id);
   const canEdit = isOwner || (sharedEntry && sharedEntry.role === 'write');
 
-  // Tabs: Start + alle Optionen (Kalender ist separat umschaltbar)
-  const optionTabs = ['Start', ...(Array.isArray(projekt.optionen) ? projekt.optionen : [])];
 
-  useEffect(() => {
-    if (projekt) {
-      setActiveOptionTab('Start');
-    }
-  }, [projekt]);
 
   // Dokumentationen laden
   const loadDocumentations = async () => {
@@ -313,85 +293,53 @@ export default function ProjektDetail({
       });
   }, [projekt]);
 
-  // Gatherings laden (unabhängig vom aktiven Tab)
-  useEffect(() => {
-    if (!projekt) return;
-    setGatheringLoading(true);
-    supabase
-      .from('gatherings')
-      .select('*')
-      .eq('projekt_id', projekt.id)
-      .order('datum', { ascending: false })
-      .then(({ data }) => {
-        setGatherings(data || []);
-        setGatheringLoading(false);
-      });
-  }, [projekt]);
 
-  async function handleNameSave(id: string) {
-    const newName = editNames[id];
-    const { error } = await supabase.from("projekte").update({ name: newName }).eq("id", id);
-    if (!error) {
-      setEditStates({ ...editStates, [id]: false });
+
+  async function handleNameSave(id: string, newName: string) {
+    try {
+      const { error } = await supabase.from("projekte").update({ name: newName }).eq("id", id);
+      if (error) {
+        console.error('Fehler beim Speichern des Namens:', error);
+        alert('Fehler beim Speichern des Namens: ' + error.message);
+        return;
+      }
+      
+      // Projekt-Objekt aktualisieren
+      projekt.name = newName;
+      
+      alert('Projektname erfolgreich gespeichert!');
+    } catch (error) {
+      console.error('Fehler beim Speichern des Namens:', error);
+      alert('Fehler beim Speichern des Namens');
     }
   }
 
-  async function handleDescSave(id: string) {
-    const newDesc = editDescs[id];
-    const { error } = await supabase.from("projekte").update({ beschreibung: newDesc }).eq("id", id);
-  }
-
-  async function handleAddGathering() {
-    setGatheringError('');
-    setGatheringLoading(true);
-    
-    // Verwende das ausgewählte Kalenderdatum, falls das Form-Datum leer ist
-    const datumToUse = gatheringForm.datum || selectedDate;
-    
-    if (!datumToUse) {
-      setGatheringError('Bitte wähle ein Datum aus dem Kalender oder gib ein Datum ein.');
-      setGatheringLoading(false);
-      return;
+  async function handleDescSave(id: string, newDesc: string) {
+    try {
+      const { error } = await supabase.from("projekte").update({ beschreibung: newDesc }).eq("id", id);
+      if (error) {
+        console.error('Fehler beim Speichern der Beschreibung:', error);
+        alert('Fehler beim Speichern der Beschreibung: ' + error.message);
+        return;
+      }
+      
+      // Projekt-Objekt aktualisieren
+      projekt.beschreibung = newDesc;
+      
+      alert('Projektbeschreibung erfolgreich gespeichert!');
+    } catch (error) {
+      console.error('Fehler beim Speichern der Beschreibung:', error);
+      alert('Fehler beim Speichern der Beschreibung');
     }
-    
-    const { startzeit, endzeit, beschreibung, personen_ids, dialoge } = gatheringForm;
-    const { error, data } = await supabase.from('gatherings').insert({
-      projekt_id: projekt.id,
-      datum: datumToUse,
-      startzeit,
-      endzeit,
-      beschreibung,
-      personen_ids,
-      dialoge,
-    }).select();
-    if (error) {
-      setGatheringError(error.message);
-    } else {
-      setGatherings(g => [data[0], ...g]);
-      setGatheringForm({ datum: '', startzeit: '', endzeit: '', beschreibung: '', personen_ids: [], dialoge: [{ text: '', imageUrl: '' }] });
-    }
-    setGatheringLoading(false);
   }
 
-  async function handleDeleteGathering(id: string) {
-    setGatheringLoading(true);
-    await supabase.from('gatherings').delete().eq('id', id);
-    setGatherings(g => g.filter(ga => ga.id !== id));
-    setGatheringLoading(false);
-  }
 
-  async function handleDeleteOption(opt: string, deleteGatherings: boolean) {
-    setDeleteGatheringsLoading(true);
+
+  async function handleDeleteOption(opt: string) {
     let neueOptionen = Array.isArray(projekt.optionen) ? projekt.optionen.filter((o: string) => o !== opt) : [];
     // Option aus Projekt entfernen
     await supabase.from('projekte').update({ optionen: neueOptionen }).eq('id', projekt.id);
-    // Gatherings ggf. löschen
-    if (opt === 'Physical Gatherings' && deleteGatherings) {
-      await supabase.from('gatherings').delete().eq('projekt_id', projekt.id);
-      setGatherings([]);
-    }
     setShowDeleteOptionDialog({opt: null, open: false});
-    setDeleteGatheringsLoading(false);
   }
 
   // Download aller Dateien im ausgewählten Zeitraum
@@ -545,26 +493,31 @@ export default function ProjektDetail({
         return;
       }
 
-      // Dokumentationen nach aktuellen Filtern filtern
-      const filteredDocs = docsInRange.filter(doc => {
-        if (showAll) return true; // Wenn "Alle" explizit aktiviert ist
-        if (activeDocumentationFilters.length === 0) return false; // Wenn keine Filter aktiv sind, nichts anzeigen
-        
-        // Prüfen ob Archiv ausgewählt ist
-        const isArchivSelected = activeDocumentationFilters.includes('archiv');
-        const isArchivDoc = doc.typ === 'archiv';
-        
-        // Prüfen ob Live-Dokumentationstypen ausgewählt sind
-        const isLiveTypeSelected = activeDocumentationFilters.some(filter => 
-          filter === 'meeting' || filter === 'interview' || filter === 'fieldnote'
-        );
-        const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
-        
-        // Dokumentation anzeigen wenn:
-        // - Archiv ausgewählt UND es ist eine Archiv-Dokumentation
-        // - Live-Typ ausgewählt UND es ist eine passende Live-Dokumentation
-        return (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
-      });
+             // Dokumentationen nach aktuellen Filtern filtern
+       let filteredDocs = docsInRange.filter(doc => {
+         if (showAll) return true; // Wenn "Alle" explizit aktiviert ist
+         if (activeDocumentationFilters.length === 0) return false; // Wenn keine Filter aktiv sind, nichts anzeigen
+         
+         // Prüfen ob Archiv ausgewählt ist
+         const isArchivSelected = activeDocumentationFilters.includes('archiv');
+         const isArchivDoc = doc.typ === 'archiv';
+         
+         // Prüfen ob Live-Dokumentationstypen ausgewählt sind
+         const isLiveTypeSelected = activeDocumentationFilters.some(filter => 
+           filter === 'meeting' || filter === 'interview' || filter === 'fieldnote'
+         );
+         const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
+         
+         // Dokumentation anzeigen wenn:
+         // - Archiv ausgewählt UND es ist eine Archiv-Dokumentation
+         // - Live-Typ ausgewählt UND es ist eine passende Live-Dokumentation
+         return (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
+       });
+
+       // Wenn spezifische Dokumentationen ausgewählt sind, nur diese verwenden
+       if (selectedDocumentations.length > 0) {
+         filteredDocs = filteredDocs.filter(doc => selectedDocumentations.includes(doc.id));
+       }
 
       if (filteredDocs.length === 0) {
         alert('Keine Dokumentationen mit den aktuellen Filtern im ausgewählten Zeitraum gefunden.');
@@ -1360,8 +1313,8 @@ export default function ProjektDetail({
       <button
         onClick={onBack}
         style={{
-          background: 'transparent',
-          color: 'var(--button)',
+          background: 'var(--button)',
+          color: 'var(--text-primary)',
           borderRadius: 8,
           padding: '8px 16px',
           marginBottom: 24,
@@ -1369,69 +1322,15 @@ export default function ProjektDetail({
           fontWeight: 600,
           display: 'flex',
           alignItems: 'center',
-          gap: 8
+          gap: 8,
+          border: 'none',
+          transition: 'all 0.2s ease'
         }}
       >
-        ← Zurück zur Übersicht
+        ←
       </button>
 
-      {/* Tabs-Leiste + Kalender-Toggle */}
-      <TabNavigation
-        optionTabs={optionTabs}
-        activeOptionTab={activeOptionTab}
-        showCalendar={showCalendar}
-        selectedDate={selectedDate}
-        onTabChange={setActiveOptionTab}
-        onCalendarToggle={() => setShowCalendar(v => !v)}
-        onDeleteOption={(opt) => setShowDeleteOptionDialog({opt, open: true})}
-      />
-
-       {showCalendar && (
-         <div className="calendar-container" style={{
-           marginBottom: 16,
-           display: 'flex',
-           gap: 16,
-           alignItems: 'flex-start'
-         }}>
-           <div style={{ flexShrink: 0 }}>
-             <CalendarView
-               gatherings={gatherings}
-               selectedDate={selectedDate}
-               onChangeSelectedDate={handleDateSelect}
-             />
-           </div>
-           <div style={{ flex: 1, minWidth: 0 }}>
-             <div style={{ fontWeight: 700, marginBottom: 8, fontSize: '0.95rem' }} className="text-primary">Einträge am {selectedDate}</div>
-             {gatheringLoading ? (
-               <div className="text-secondary">Lade...</div>
-             ) : (
-               (() => {
-                 const daily = gatherings.filter((g: any) => g.datum === selectedDate);
-                 if (daily.length === 0) return <div style={{ fontSize: '0.9rem' }} className="text-muted">[Keine Einträge]</div>;
-                 return (
-                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                     {daily.map((g: any) => (
-                       <li key={g.id} className="calendar-gathering-item">
-                         <div><b>Zeit:</b> {g.startzeit || '-'}{g.endzeit ? `–${g.endzeit}` : ''}</div>
-                         <div><b>Beschreibung:</b> {g.beschreibung || '-'}</div>
-                         <div><b>Personen:</b> {Array.isArray(g.personen_ids) ? g.personen_ids.map((id: string) => {
-                           const p = personenProjekt.find((pp: any) => pp.id === id);
-                           return p ? `${p.vorname} ${p.nachname}` : id;
-                         }).join(', ') : ''}</div>
-                         {canEdit && (
-                           <button onClick={() => handleDeleteGathering(g.id)} style={{ background: 'var(--error)', border: 'none', borderRadius: 4, padding: '3px 8px', fontWeight: 600, fontSize: 12, cursor: 'pointer', marginTop: 6 }}>Löschen</button>
-                         )}
-                       </li>
-                     ))}
-                   </ul>
-                 );
-               })()
-             )}
-           </div>
-         </div>
-       )}
-
-                       {/* Projekt-Header - immer oben */}
+      {/* Projekt-Header - immer oben */}
                 <ProjectInfoCard 
           projekt={projekt} 
           canEdit={canEdit}
@@ -1458,8 +1357,6 @@ export default function ProjektDetail({
          />
 
                  {/* Datumsbereich-Filter und Dokumentations-Filter und Liste */}
-                 {activeOptionTab === 'Start' && (
-                   <>
                                                                                           <DateRangeFilter
                           startDate={startDate}
                           endDate={endDate}
@@ -1467,13 +1364,8 @@ export default function ProjektDetail({
                           onEndDateChange={handleEndDateChange}
                           onClearRange={handleClearDateRange}
                           onDownloadFiles={handleDownloadFiles}
-                          onExportWord={handleExportWord}
-                          onExportPDF={handleExportPDF}
                           hasFiles={hasFilesInRange}
-                          hasDocumentations={documentations.length > 0}
                           downloading={downloadingFiles}
-                          exportingWord={exportingWord}
-                          exportingPDF={exportingPDF}
                           projektCreatedAt={projekt.created_at}
                         />
 
@@ -1484,6 +1376,10 @@ export default function ProjektDetail({
                              documentations={documentations}
                              activeDocumentationFilters={activeDocumentationFilters}
                              onFilterChange={handleFilterChange}
+                             onExportWord={handleExportWord}
+                             onExportPDF={handleExportPDF}
+                             exportingWord={exportingWord}
+                             exportingPDF={exportingPDF}
                            />
                            
                            <TagFilter
@@ -1524,8 +1420,6 @@ export default function ProjektDetail({
                          </div>
                        )}
                      </div>
-                   </>
-                 )}
 
                      {/* Dialog für Projekt löschen */}
         <DeleteProjectDialog
@@ -1539,43 +1433,15 @@ export default function ProjektDetail({
                {/* Dialog für Option löschen */}
         <DeleteOptionDialog
           open={showDeleteOptionDialog.open}
-          loading={deleteGatheringsLoading}
-          onRemoveOnly={() => handleDeleteOption(showDeleteOptionDialog.opt!, false)}
-          onRemoveWithGatherings={() => handleDeleteOption(showDeleteOptionDialog.opt!, true)}
+          loading={false}
+          onRemoveOnly={() => handleDeleteOption(showDeleteOptionDialog.opt!)}
           onClose={() => setShowDeleteOptionDialog({ opt: null, open: false })}
         />
 
-      {/* Tab-Inhalte */}
-      {activeOptionTab === 'Start' && (
+             {/* Tab-Inhalte */}
         <div>
           {/* Projekt-Details werden jetzt über ProjectInfoCard angezeigt */}
         </div>
-      )}
-
-               {/* Physical Gatherings Tab */}
-        {activeOptionTab === 'Physical Gatherings' && canEdit && (
-          <PhysicalGatheringForm
-            gatheringForm={gatheringForm}
-            setGatheringForm={setGatheringForm}
-            gatheringLoading={gatheringLoading}
-            gatheringError={gatheringError}
-            personenProjekt={personenProjekt}
-            selectedDate={selectedDate}
-            onAddGathering={handleAddGathering}
-          />
-        )}
-
-      
-
-             {activeOptionTab === 'Physical Gatherings' && (
-         <PhysicalGatheringList
-           gatherings={gatherings}
-           gatheringLoading={gatheringLoading}
-           personenProjekt={personenProjekt}
-           canEdit={canEdit}
-           onDeleteGathering={handleDeleteGathering}
-         />
-       )}
 
                 {/* Dokumentations-Formular */}
          {showNewDocumentation && (

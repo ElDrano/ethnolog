@@ -198,13 +198,14 @@ export default function DocumentationList({
                 <button
                   onClick={() => onEditDocumentation(doc)}
                   style={{
-                    background: 'var(--primary)',
+                    background: 'var(--button)',
                     border: 'none',
                     borderRadius: 4,
                     padding: '4px 8px',
                     cursor: 'pointer',
                     fontSize: '0.8rem',
-                    color: 'white'
+                    color: 'var(--text-primary)',
+                    transition: 'all 0.2s ease'
                   }}
                 >
                   Bearbeiten

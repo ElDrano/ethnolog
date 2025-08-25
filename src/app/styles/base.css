@@ -15,48 +15,19 @@ body {
   transition: all 0.2s ease-in-out;
 }
 
-/* Dark Mode - Alle Texte weiß (Standard) */
-body:not(.light-mode) * {
-  color: #ffffff !important;
+/* Theme-spezifische Text-Farben */
+body:not(.light-mode) {
+  color: #ffffff;
 }
 
-/* Ausnahmen für spezielle Elemente im Dark Mode */
-body:not(.light-mode) button {
-  color: white !important; /* Buttons haben weißen Text */
-}
-
-body:not(.light-mode) .sidebar-link.active {
-  color: white !important; /* Aktive Sidebar-Links haben weißen Text */
-}
-
-body:not(.light-mode) input::placeholder,
-body:not(.light-mode) textarea::placeholder {
-  color: #94a3b8 !important; /* Placeholder-Text bleibt grau */
-}
-
-/* Light Mode Overrides */
 body.light-mode {
   color: #000000;
-  background: var(--background);
 }
 
-/* Light Mode - Alle Texte schwarz */
-body.light-mode * {
-  color: #000000 !important;
-}
-
-/* Ausnahmen für spezielle Elemente im Light Mode */
-body.light-mode button {
-  color: rgb(0, 0, 0) !important; /* Buttons haben weißen Text */
-}
-
-body.light-mode .sidebar-link.active {
-  color: white !important; /* Aktive Sidebar-Links haben weißen Text */
-}
-
-body.light-mode input::placeholder,
-body.light-mode textarea::placeholder {
-  color: #94a3b8 !important; /* Placeholder-Text bleibt grau */
+/* Placeholder-Text bleibt immer grau */
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8 !important;
 }
 
 /* Reset & Base Elements */

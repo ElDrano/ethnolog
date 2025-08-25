@@ -1,40 +1,7 @@
 /* ===== COMPONENT STYLES ===== */
 
 /* ===== SIDEBAR ===== */
-.sidebar-nav {
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  box-shadow: var(--shadow);
-}
-
-.sidebar-title {
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 1.25rem;
-}
-
-.sidebar-link {
-  color: var(--text-secondary);
-  background: transparent;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin: 4px 8px;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-}
-
-.sidebar-link:hover,
-.sidebar-link:focus {
-  background: var(--surface-hover);
-  color: var(--primary-blue);
-  border-color: var(--primary-blue);
-}
-
-.sidebar-link.active {
-  background: var(--primary-blue);
-  color: white;
-  border-color: var(--primary-blue);
-}
+/* Sidebar-Styles wurden in sidebar.css verschoben */
 
 /* ===== FORM ELEMENTS ===== */
 input,
@@ -73,6 +40,32 @@ button {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+/* Logout Button spezifisch */
+.logout-button {
+  background: var(--button);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0;
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+  background: var(--primary-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.logout-button:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 button:hover {
@@ -149,17 +142,44 @@ button.secondary:hover {
   background: var(--background);
   color: var(--text-primary);
   border: 1px solid var(--border);
+  padding: 8px;
+  border-radius: 6px;
 }
 
 .sidebar-login button[type="submit"] {
-  background: var(--primary-blue);
+  background: var(--button);
   color: white;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  border: none;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-login button[type="submit"]:hover {
+  background: var(--primary-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .sidebar-login button[type="button"] {
-  background: var(--surface);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
+  background: var(--button);
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  border: none;
+  margin-top: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-login button[type="button"]:hover {
+  background: var(--primary-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 /* ===== DOCUMENTATION SYSTEM ===== */
@@ -240,4 +260,29 @@ button.secondary:hover {
 
 .status-error {
   color: var(--error);
+}
+
+/* ===== LOGIN MESSAGES ===== */
+.login-error {
+  color: #ffb4b4;
+  margin-top: 8px;
+}
+
+.login-success {
+  color: #b4ffb4;
+  margin-top: 8px;
+}
+
+/* ===== HOMEPAGE ===== */
+.homepage-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.homepage-subtitle {
+  font-size: 1.2rem;
+  max-width: 600px;
+  text-align: center;
+  color: var(--text-primary);
 }

@@ -41,6 +41,7 @@ export default function SidebarNav() {
       <ul className="sidebar-list">
         <li><Link className="sidebar-link" href="/">Startseite</Link></li>
         <ProjekteButton />
+        <li><Link className="sidebar-link" href="/profile">Profil</Link></li>
       </ul>
       <SidebarLogin />
     </nav>

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../../supabaseClient';
 
 interface TagFilterProps {
   documentations: any[];
@@ -14,15 +15,47 @@ export default function TagFilter({
 }: TagFilterProps) {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
-  // Sammle alle verfügbaren Tags aus den Dokumentationen
+  // Lade verfügbare Tags aus der Datenbank und aus den Dokumentationen
   useEffect(() => {
-    const tags = new Set<string>();
-    documentations.forEach(doc => {
-      if (doc.tags && Array.isArray(doc.tags)) {
-        doc.tags.forEach((tag: string) => tags.add(tag));
+    const loadAvailableTags = async () => {
+      try {
+        // Lade Tags aus der Datenbank
+        const { data: dbTags, error } = await supabase
+          .from('available_tags')
+          .select('name')
+          .order('name');
+
+        if (error) {
+          console.error('Fehler beim Laden der Tags aus der Datenbank:', error);
+        }
+
+        // Sammle auch Tags aus den Dokumentationen (für Backward-Kompatibilität)
+        const docTags = new Set<string>();
+        documentations.forEach(doc => {
+          if (doc.tags && Array.isArray(doc.tags)) {
+            doc.tags.forEach((tag: string) => docTags.add(tag));
+          }
+        });
+
+        // Kombiniere Tags aus Datenbank und Dokumentationen
+        const dbTagNames = dbTags?.map(tag => tag.name) || [];
+        const allTags = new Set([...dbTagNames, ...Array.from(docTags)]);
+        setAvailableTags(Array.from(allTags).sort());
+      } catch (error) {
+        console.error('Fehler beim Laden der Tags:', error);
+        
+        // Fallback: Sammle nur Tags aus den Dokumentationen
+        const tags = new Set<string>();
+        documentations.forEach(doc => {
+          if (doc.tags && Array.isArray(doc.tags)) {
+            doc.tags.forEach((tag: string) => tags.add(tag));
+          }
+        });
+        setAvailableTags(Array.from(tags).sort());
       }
-    });
-    setAvailableTags(Array.from(tags).sort());
+    };
+
+    loadAvailableTags();
   }, [documentations]);
 
   const handleTagToggle = (tag: string) => {

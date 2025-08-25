@@ -13,15 +13,10 @@
   color: var(--text-muted);
 }
 
-/* Theme-specific text utilities */
-body.light-mode .text-primary,
-body.light-mode .text-secondary {
-  color: #000000 !important;
-}
-
-body:not(.light-mode) .text-primary,
-body:not(.light-mode) .text-secondary {
-  color: #ffffff !important;
+/* Theme-specific text utilities - vereinfacht */
+.text-primary,
+.text-secondary {
+  color: var(--text-primary);
 }
 
 /* ===== BACKGROUND UTILITIES ===== */

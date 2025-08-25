@@ -15,8 +15,8 @@ export default function DocumentationButtons({
       <button
         onClick={onArchivClick}
         style={{
-          background: '#4CAF50',
-          color: '#fff',
+          background: 'var(--button)',
+          color: 'var(--text-primary)',
           border: 'none',
           borderRadius: 6,
           padding: '8px 16px',
@@ -25,7 +25,8 @@ export default function DocumentationButtons({
           fontSize: 14,
           display: 'flex',
           alignItems: 'center',
-          gap: 6
+          gap: 6,
+          transition: 'all 0.2s ease'
         }}
       >
         <span style={{ fontSize: 16 }}>+</span>
@@ -34,8 +35,8 @@ export default function DocumentationButtons({
       <button
         onClick={onLiveClick}
         style={{
-          background: '#2196F3',
-          color: '#fff',
+          background: 'var(--button)',
+          color: 'var(--text-primary)',
           border: 'none',
           borderRadius: 6,
           padding: '8px 16px',
@@ -44,7 +45,8 @@ export default function DocumentationButtons({
           fontSize: 14,
           display: 'flex',
           alignItems: 'center',
-          gap: 6
+          gap: 6,
+          transition: 'all 0.2s ease'
         }}
       >
         <span style={{ fontSize: 16 }}>+</span>

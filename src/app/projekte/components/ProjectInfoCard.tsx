@@ -24,9 +24,15 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
   const handleNameSave = async (projektId: string) => {
     if (!onNameUpdate) return;
     
+    const newName = editNames[projektId] || '';
+    if (!newName.trim()) {
+      alert('Bitte geben Sie einen Namen ein.');
+      return;
+    }
+    
     setLocalLoading(true);
     try {
-      await onNameUpdate(projektId, editNames[projektId] || '');
+      await onNameUpdate(projektId, newName);
       setEditStates({ ...editStates, [projektId]: false });
     } catch (error) {
       console.error('Fehler beim Speichern des Namens:', error);
@@ -39,9 +45,11 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
   const handleDescSave = async (projektId: string) => {
     if (!onDescUpdate) return;
     
+    const newDesc = editDescs[projektId] || '';
+    
     setLocalLoading(true);
     try {
-      await onDescUpdate(projektId, editDescs[projektId] || '');
+      await onDescUpdate(projektId, newDesc);
       setOpenDesc({ ...openDesc, [projektId]: false });
     } catch (error) {
       console.error('Fehler beim Speichern der Beschreibung:', error);
@@ -92,14 +100,15 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
                 <button 
                   onClick={() => handleNameSave(projekt.id)} 
                   style={{ 
-                    background: 'var(--primary-blue)', 
-                    color: 'white', 
+                    background: 'var(--button)', 
+                    color: 'var(--text-primary)', 
                     border: 'none', 
                     borderRadius: 6, 
                     padding: '6px 12px', 
                     fontWeight: 600, 
                     cursor: 'pointer',
-                    fontSize: 14
+                    fontSize: 14,
+                    transition: 'all 0.2s ease'
                   }}
                   disabled={loading || localLoading}
                 >

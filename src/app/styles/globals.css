@@ -3,5 +3,6 @@
 /* Import modular CSS files */
 @import './variables.css';
 @import './base.css';
+@import './sidebar.css';
 @import './components.css';
 @import './utilities.css';
