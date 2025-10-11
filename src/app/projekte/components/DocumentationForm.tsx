@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { supabase } from '../../supabaseClient';
 import SecureFileDisplay from './SecureFileDisplay';
 import TagInput from './TagInput';
+import AudioRecorder from './AudioRecorder';
 
 interface DocumentationFormProps {
   projekt: any;
@@ -62,6 +63,9 @@ export default function DocumentationForm({
   });
   const [newPerson, setNewPerson] = useState({ vorname: '', nachname: '', email: '', position: '' });
   const [uploading, setUploading] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioFileName, setAudioFileName] = useState<string | null>(null);
+  const [showAudioRecorder, setShowAudioRecorder] = useState(false);
 
   const handleAddPerson = () => {
     if (!newPerson.nachname.trim()) return;
@@ -176,12 +180,76 @@ export default function DocumentationForm({
     }));
   };
 
+  const handleAudioReady = (blob: Blob, fileName: string) => {
+    setAudioBlob(blob);
+    setAudioFileName(fileName);
+  };
+
+  const handleAudioFinish = () => {
+    setShowAudioRecorder(false);
+  };
+
+  const uploadAudioFile = async () => {
+    if (!audioBlob || !audioFileName) return null;
+
+    try {
+      setUploading(true);
+      const sanitizedFileName = `audio-${Date.now()}-${audioFileName.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      
+      console.log('Uploading audio file:', sanitizedFileName, audioBlob.type, audioBlob.size);
+      
+      // Upload ohne contentType Parameter - wie bei normalem File-Upload
+      const { data, error } = await supabase.storage
+        .from('documentation-files')
+        .upload(sanitizedFileName, audioBlob, { 
+          upsert: true,
+          cacheControl: '3600'
+        });
+
+      if (error) {
+        console.error('Audio upload error:', error);
+        alert(`Fehler beim Upload der Audiodatei: ${error.message}`);
+        return null;
+      }
+
+      console.log('Audio upload successful:', sanitizedFileName);
+      
+      return {
+        name: audioFileName,
+        fileName: sanitizedFileName,
+        type: audioBlob.type || 'audio/mpeg',
+        size: audioBlob.size
+      };
+    } catch (error) {
+      console.error('General audio upload error:', error);
+      alert('Fehler beim Audio-Upload: ' + error);
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
+    let audioFile: { name: string; fileName: string; type: string; size: number } | null = null;
+    
+    // Audio-Datei hochladen, falls vorhanden
+    if (audioBlob && audioFileName) {
+      audioFile = await uploadAudioFile();
+      if (audioFile) {
+        // Audio-Datei zu den Dateien hinzufügen
+        setFormData((prev: any) => ({
+          ...prev,
+          dateien: [...prev.dateien, audioFile]
+        }));
+      }
+    }
+
     const finalData = {
       ...formData,
       projekt_id: projekt.id,
       untertyp: liveDocumentationType,
-      tags: formData.tags || []
+      tags: formData.tags || [],
+      dateien: audioFile ? [...formData.dateien, audioFile] : formData.dateien
     };
     await onSave(finalData);
   };
@@ -214,8 +282,16 @@ export default function DocumentationForm({
                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
            <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>
              {editingDocumentation ? 
-               `${documentationType === 'archiv' ? 'Archiv-Dokumentation' : 'Live-Dokumentation'} bearbeiten` :
-               `${documentationType === 'archiv' ? 'Archiv-Dokumentation' : 'Live-Dokumentation'} erstellen`
+               `${documentationType === 'archiv' ? 'Archiv-Dokumentation' : 
+                  liveDocumentationType === 'meeting' ? 'Meeting' :
+                  liveDocumentationType === 'interview' ? 'Interview' :
+                  liveDocumentationType === 'fieldnote' ? 'Feldnotiz' :
+                  'Live-Dokumentation'} bearbeiten` :
+               `${documentationType === 'archiv' ? 'Archiv-Dokumentation' : 
+                  liveDocumentationType === 'meeting' ? 'Meeting' :
+                  liveDocumentationType === 'interview' ? 'Interview' :
+                  liveDocumentationType === 'fieldnote' ? 'Feldnotiz' :
+                  'Live-Dokumentation'} erstellen`
              }
            </h2>
           <button
@@ -762,6 +838,85 @@ export default function DocumentationForm({
                     />
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Audio-Aufnahme für Interviews */}
+            {liveDocumentationType === 'interview' && (
+              <div>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between',
+                  marginBottom: 12 
+                }}>
+                  <label style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>
+                    🎤 Audio-Aufnahme
+                  </label>
+                  {!showAudioRecorder && !audioBlob && (
+                    <button
+                      onClick={() => setShowAudioRecorder(true)}
+                      style={{
+                        padding: '8px 16px',
+                        background: 'var(--primary-blue)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        fontSize: 14,
+                        fontWeight: 600
+                      }}
+                    >
+                      🎙️ Aufnahme starten
+                    </button>
+                  )}
+                </div>
+                
+                {showAudioRecorder && (
+                  <AudioRecorder 
+                    onAudioReady={handleAudioReady}
+                    onFinish={handleAudioFinish}
+                  />
+                )}
+                
+                {!showAudioRecorder && audioBlob && (
+                  <div style={{
+                    padding: 16,
+                    background: 'var(--surface)',
+                    border: '2px solid var(--primary-green)',
+                    borderRadius: 8,
+                    marginBottom: 12
+                  }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 8,
+                      color: 'var(--primary-green)',
+                      fontWeight: 600
+                    }}>
+                      ✓ Audio-Aufnahme bereit ({audioFileName})
+                    </div>
+                    <button
+                      onClick={() => {
+                        setAudioBlob(null);
+                        setAudioFileName(null);
+                      }}
+                      style={{
+                        marginTop: 8,
+                        padding: '6px 12px',
+                        background: 'var(--error)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 600
+                      }}
+                    >
+                      🗑️ Aufnahme entfernen
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
