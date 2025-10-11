@@ -128,108 +128,116 @@ export default function DocumentationList({
           boxShadow: 'var(--shadow)',
           position: 'relative'
         }}>
-          {/* Auswahl-Checkbox */}
-          <div style={{
-            position: 'absolute',
-            top: 16,
-            left: 16,
-            zIndex: 1
-          }}>
+          {/* Header mit Checkbox, Pfeil und Name */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
+            {/* Auswahl-Checkbox */}
             <input
               type="checkbox"
               checked={selectedDocumentations.includes(doc.id)}
               onChange={() => onToggleDocumentationSelection(doc.id)}
-              style={{ cursor: 'pointer' }}
+              style={{ 
+                cursor: 'pointer',
+                marginTop: 4,
+                flexShrink: 0
+              }}
             />
-          </div>
 
-          {/* Dokumentationsinhalt mit Padding für Checkbox */}
-          <div style={{ paddingLeft: 40 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  {doc.name}
-                </h3>
-                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-                  {doc.typ === 'archiv' ? 'Archiv' : 
-                   doc.untertyp === 'meeting' ? 'Meeting' :
-                   doc.untertyp === 'interview' ? 'Interview' :
-                   doc.untertyp === 'fieldnote' ? 'Feldnotiz' : 'Dokumentation'} • {new Date(doc.datum).toLocaleDateString('de-DE')}
-                  {doc.startzeit && doc.endzeit && ` • ${doc.startzeit} - ${doc.endzeit}`}
+            {/* Ausklapp-Pfeil */}
+            <button
+              onClick={() => onToggleExpanded(doc.id)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1.2rem',
+                color: 'var(--text-primary)',
+                padding: 0,
+                lineHeight: 1,
+                marginTop: 2,
+                flexShrink: 0,
+                transition: 'transform 0.2s ease'
+              }}
+              title={expandedDocumentations[doc.id] ? 'Einklappen' : 'Ausklappen'}
+            >
+              {expandedDocumentations[doc.id] ? '▼' : '►'}
+            </button>
+
+            {/* Name und Infos */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {doc.name}
+                  </h3>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: 4 }}>
+                    {doc.typ === 'archiv' ? 'Archiv' : 
+                     doc.untertyp === 'meeting' ? 'Meeting' :
+                     doc.untertyp === 'interview' ? 'Interview' :
+                     doc.untertyp === 'fieldnote' ? 'Feldnotiz' : 'Dokumentation'} • {new Date(doc.datum).toLocaleDateString('de-DE')}
+                    {doc.startzeit && doc.endzeit && ` • ${doc.startzeit} - ${doc.endzeit}`}
+                  </div>
+                  
+                  {doc.tags && Array.isArray(doc.tags) && doc.tags.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                      {doc.tags.map((tag: string, index: number) => (
+                        <span
+                          key={index}
+                          style={{
+                            padding: '2px 6px',
+                            background: 'var(--primary-blue)',
+                            color: 'white',
+                            borderRadius: 8,
+                            fontSize: '0.7rem',
+                            fontWeight: 600
+                          }}
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
-                {doc.tags && Array.isArray(doc.tags) && doc.tags.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
-                    {doc.tags.map((tag: string, index: number) => (
-                      <span
-                        key={index}
-                        style={{
-                          padding: '2px 6px',
-                          background: 'var(--primary-blue)',
-                          color: 'white',
-                          borderRadius: 8,
-                          fontSize: '0.7rem',
-                          fontWeight: 600
-                        }}
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  onClick={() => onToggleExpanded(doc.id)}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid var(--border)',
-                    borderRadius: 4,
-                    padding: '4px 8px',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    color: 'var(--text-secondary)'
-                  }}
-                >
-                  {expandedDocumentations[doc.id] ? 'Weniger' : 'Mehr'}
-                </button>
-                
-                <button
-                  onClick={() => onEditDocumentation(doc)}
-                  style={{
-                    background: 'var(--button)',
-                    border: 'none',
-                    borderRadius: 4,
-                    padding: '4px 8px',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    color: 'var(--text-primary)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Bearbeiten
-                </button>
-                
-                <button
-                  onClick={() => onDeleteDocumentation(doc.id)}
-                  style={{
-                    background: 'var(--error)',
-                    border: 'none',
-                    borderRadius: 4,
-                    padding: '4px 8px',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    color: 'white'
-                  }}
-                >
-                  Löschen
-                </button>
+                {/* Aktions-Buttons rechts */}
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button
+                    onClick={() => onEditDocumentation(doc)}
+                    style={{
+                      background: 'var(--button)',
+                      border: 'none',
+                      borderRadius: 4,
+                      padding: '4px 8px',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      color: 'var(--text-primary)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Bearbeiten
+                  </button>
+                  
+                  <button
+                    onClick={() => onDeleteDocumentation(doc.id)}
+                    style={{
+                      background: 'var(--error)',
+                      border: 'none',
+                      borderRadius: 4,
+                      padding: '4px 8px',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      color: 'white'
+                    }}
+                  >
+                    Löschen
+                  </button>
+                </div>
               </div>
             </div>
+          </div>
 
-            {expandedDocumentations[doc.id] && (
-              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+          {/* Ausgeklappter Inhalt */}
+          {expandedDocumentations[doc.id] && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', paddingLeft: 60 }}>
                 {doc.beschreibung && (
                   <div style={{ marginBottom: 12 }}>
                     <strong>Beschreibung:</strong> {doc.beschreibung}
@@ -317,7 +325,6 @@ export default function DocumentationList({
                  )}
               </div>
             )}
-          </div>
         </div>
       ))}
 
