@@ -17,17 +17,9 @@ function ProjekteButton({ isCollapsed }: { isCollapsed: boolean }) {
 
   if (!user) return null;
   
-  const handleProjekteClick = () => {
-    // Wenn wir auf einem Projekt sind, zur Listenansicht zurückkehren
-    if (window.location.pathname === '/projekte') {
-      // Event an die ProjektePage senden, um selectedProjekt zurückzusetzen
-      window.dispatchEvent(new CustomEvent('resetToProjekteList'));
-    }
-  };
-  
   return (
     <li>
-      <Link className="sidebar-link" href="/projekte" onClick={handleProjekteClick} title="Projekte">
+      <Link className="sidebar-link" href="/projekte" title="Projekte">
         {isCollapsed ? '📁' : 'Projekte'}
       </Link>
     </li>

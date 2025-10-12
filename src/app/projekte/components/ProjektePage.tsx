@@ -1,19 +1,19 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../supabaseClient";
 import SidebarLogin from "../../sidebarLogin";
 import ProjektList from "./ProjektList";
 import NewProjectForm from "./NewProjectForm";
 import DeleteDialog from "./DeleteDialog";
-import ProjektDetail from "./ProjektDetail";
 
 export default function ProjektePage() {
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [projekte, setProjekte] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [projektUsers, setProjektUsers] = useState<{[id:string]: any[]}>({});
-  const [selectedProjekt, setSelectedProjekt] = useState<any>(null);
   const [showNewProject, setShowNewProject] = useState(false);
   const [creatingProject, setCreatingProject] = useState(false);
   const [createError, setCreateError] = useState("");
@@ -88,18 +88,9 @@ export default function ProjektePage() {
     });
   }, [user]);
 
-  // Event Listener für Navigation zur Projektliste
-  useEffect(() => {
-    const handleResetToProjekteList = () => {
-      setSelectedProjekt(null);
-    };
-
-    window.addEventListener('resetToProjekteList', handleResetToProjekteList);
-    
-    return () => {
-      window.removeEventListener('resetToProjekteList', handleResetToProjekteList);
-    };
-  }, []);
+  function handleSelectProjekt(projekt: any) {
+    router.push(`/projekte/${projekt.id}`);
+  }
 
   async function handleDelete(id: string) {
     setLoading(true);
@@ -175,19 +166,6 @@ export default function ProjektePage() {
     );
   }
 
-  // Einzelansicht für ein Projekt
-  if (selectedProjekt) {
-    return (
-      <ProjektDetail
-        projekt={selectedProjekt}
-        user={user}
-        onBack={() => setSelectedProjekt(null)}
-        onDelete={handleDelete}
-        loading={loading}
-      />
-    );
-  }
-
   // Listenansicht für alle Projekte
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '2rem' }}>
@@ -227,7 +205,7 @@ export default function ProjektePage() {
             projektUsers={projektUsers}
             loading={loading}
             error={error}
-            onSelectProjekt={setSelectedProjekt}
+            onSelectProjekt={handleSelectProjekt}
             onDeleteProjekt={(id) => setShowDeleteDialog({id, open: true})}
           />
 
