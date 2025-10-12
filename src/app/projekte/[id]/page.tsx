@@ -4,6 +4,9 @@ import { useRouter, useParams } from "next/navigation";
 import { supabase } from "../../supabaseClient";
 import ProjektDetail from "../components/ProjektDetail";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function ProjektPage() {
   const router = useRouter();
   const params = useParams();
