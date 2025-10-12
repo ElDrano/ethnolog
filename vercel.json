@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/projekte/:id",
+      "destination": "/projekte/[id]"
+    }
+  ]
+}
+
