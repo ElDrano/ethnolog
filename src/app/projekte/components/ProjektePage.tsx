@@ -46,41 +46,19 @@ export default function ProjektePage() {
       // Eigene Projekte
       supabase
         .from("projekte")
-        .select("id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise, organization_id")
+        .select("id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise")
         .eq("user_id", user.id),
       // Geteilte Projekte
       supabase
         .from("projekt_user")
-        .select("projekt_id, role, projekte:projekt_id(id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise, organization_id)")
-        .eq("user_id", user.id),
-      // Organisationsprojekte
-      supabase
-        .from("organization_members")
-        .select(`
-          organization_id,
-          organizations:organization_id(
-            id,
-            name,
-            projekte:projekte(id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise, organization_id)
-          )
-        `)
+        .select("projekt_id, role, projekte:projekt_id(id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise)")
         .eq("user_id", user.id)
-    ]).then(([ownRes, sharedRes, orgRes]) => {
+    ]).then(([ownRes, sharedRes]) => {
       let own = ownRes.data || [];
       let shared = (sharedRes.data || []).map((pu: any) => pu.projekte).filter(Boolean);
       
-      // Organisationsprojekte extrahieren
-      let orgProjects: any[] = [];
-      if (orgRes.data) {
-        orgRes.data.forEach((orgMember: any) => {
-          if (orgMember.organizations?.projekte) {
-            orgProjects = orgProjects.concat(orgMember.organizations.projekte);
-          }
-        });
-      }
-      
       // Alle Projekte zusammenführen und Duplikate entfernen
-      const all = [...own, ...shared, ...orgProjects].filter((p, i, arr) => 
+      const all = [...own, ...shared].filter((p, i, arr) => 
         p && arr.findIndex(x => x.id === p.id) === i
       );
       setProjekte(all);
@@ -114,7 +92,6 @@ export default function ProjektePage() {
         beschreibung: projectData.beschreibung,
         user_id: user.id,
         arbeitsweise: projectData.arbeitsweise,
-        organization_id: projectData.organization_id,
         optionen: projectData.optionen
       })
       .select()
