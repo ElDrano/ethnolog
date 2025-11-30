@@ -31,11 +31,12 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
 
   const isOwner = projekt.user_id === user.id;
 
+  // Lade Mitglieder immer, wenn das Projekt verfügbar ist (nicht nur wenn geöffnet)
   useEffect(() => {
-    if (projekt && isOpen) {
+    if (projekt?.id) {
       loadMembers();
     }
-  }, [projekt, isOpen]);
+  }, [projekt?.id]);
 
   const loadMembers = async () => {
     try {

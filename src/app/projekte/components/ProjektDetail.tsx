@@ -12,6 +12,7 @@ import ProjectInfoCard from "./ProjectInfoCard";
 import DeleteProjectDialog from "./DeleteProjectDialog";
 import DeleteOptionDialog from "./DeleteOptionDialog";
 import ProjectMembers from "./ProjectMembers";
+import ProjectLinks from "./ProjectLinks";
 
 import DocumentationButtons from "./DocumentationButtons";
 import DocumentationFilters from "./DocumentationFilters";
@@ -1380,6 +1381,13 @@ export default function ProjektDetail({
             // Lade projektUsers neu, wenn sich Mitglieder ändern
             loadProjektUsers();
           }}
+        />
+
+        {/* Interaktions- und Arbeitsräume */}
+        <ProjectLinks 
+          projekt={projekt}
+          user={user}
+          canEdit={canEdit}
         />
 
                   {/* Dokumentations-Buttons - nur sichtbar wenn Berechtigung vorhanden */}
