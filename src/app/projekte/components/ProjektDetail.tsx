@@ -11,6 +11,7 @@ import SecureFileDisplay from "./SecureFileDisplay";
 import ProjectInfoCard from "./ProjectInfoCard";
 import DeleteProjectDialog from "./DeleteProjectDialog";
 import DeleteOptionDialog from "./DeleteOptionDialog";
+import ProjectMembers from "./ProjectMembers";
 
 import DocumentationButtons from "./DocumentationButtons";
 import DocumentationFilters from "./DocumentationFilters";
@@ -122,7 +123,12 @@ export default function ProjektDetail({
 
   const isOwner = projekt.user_id === user.id;
   const sharedEntry = projektUsers[projekt.id]?.find(u => u.user_id === user.id);
+  const isMember = sharedEntry && sharedEntry.role === 'read';
+  // Nur Besitzer oder Benutzer mit 'write'-Rolle können Projekt bearbeiten
+  // Mitglieder (role='read') können nur Dokumentationen erstellen
   const canEdit = isOwner || (sharedEntry && sharedEntry.role === 'write');
+  // Mitglieder (read) können Dokumentationen erstellen, aber nicht Projekt bearbeiten
+  const canCreateDocumentation = isOwner || sharedEntry;
 
 
 
@@ -291,6 +297,32 @@ export default function ProjektDetail({
       .then(({ data, error }) => {
         setPersonenProjekt(data || []);
       });
+  }, [projekt]);
+
+  // Lade Projekt-Mitglieder
+  const loadProjektUsers = async () => {
+    if (!projekt) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('projekt_user')
+        .select('*')
+        .eq('projekt_id', projekt.id);
+
+      if (error) throw error;
+
+      setProjektUsers({
+        [projekt.id]: data || []
+      });
+    } catch (error) {
+      console.error('Fehler beim Laden der Projekt-Mitglieder:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (projekt) {
+      loadProjektUsers();
+    }
   }, [projekt]);
 
 
@@ -1340,9 +1372,18 @@ export default function ProjektDetail({
           loading={loading}
         />
 
+        {/* Mitglieder-Verwaltung */}
+        <ProjectMembers 
+          projekt={projekt}
+          user={user}
+          onMembersChange={() => {
+            // Lade projektUsers neu, wenn sich Mitglieder ändern
+            loadProjektUsers();
+          }}
+        />
 
-
-                  {/* Dokumentations-Buttons - immer sichtbar */}
+                  {/* Dokumentations-Buttons - nur sichtbar wenn Berechtigung vorhanden */}
+         {canCreateDocumentation && (
          <DocumentationButtons
            onArchivClick={() => {
              setShowNewDocumentation(true);
@@ -1355,6 +1396,7 @@ export default function ProjektDetail({
              setNewDocumentation((prev: any) => ({ ...prev, datum: selectedDate }));
            }}
          />
+         )}
 
                  {/* Datumsbereich-Filter und Dokumentations-Filter und Liste */}
                                                                                           <DateRangeFilter

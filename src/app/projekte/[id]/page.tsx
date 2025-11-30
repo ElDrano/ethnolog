@@ -54,8 +54,7 @@ export default function ProjektPage() {
       // Prüfen ob User Zugriff hat
       const hasAccess = 
         data.user_id === user.id || // Eigenes Projekt
-        await checkSharedAccess(projektId, user.id) || // Geteiltes Projekt
-        await checkOrgAccess(data.organization_id, user.id); // Org-Projekt
+        await checkSharedAccess(projektId, user.id); // Geteiltes Projekt
 
       if (!hasAccess) {
         setError("Keine Berechtigung für dieses Projekt");
@@ -82,18 +81,6 @@ export default function ProjektPage() {
     return !!data;
   }
 
-  async function checkOrgAccess(orgId: string | null, userId: string): Promise<boolean> {
-    if (!orgId) return false;
-    
-    const { data } = await supabase
-      .from("organization_members")
-      .select("id")
-      .eq("organization_id", orgId)
-      .eq("user_id", userId)
-      .single();
-    
-    return !!data;
-  }
 
   const handleBack = () => {
     router.push("/projekte");
