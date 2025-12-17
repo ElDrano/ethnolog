@@ -50,10 +50,12 @@ export default function NewProjectForm({
           style={{ 
             padding: 12, 
             borderRadius: 8, 
-            border: '1px solid #bbb', 
+            border: '1px solid var(--border)', 
             flex: 1,
             fontSize: 16,
-            fontWeight: 500
+            fontWeight: 500,
+            background: 'var(--background)',
+            color: 'var(--text-primary)'
           }}
           autoFocus
         />
@@ -103,9 +105,10 @@ export default function NewProjectForm({
             width: '100%', 
             minHeight: 100, 
             borderRadius: 8, 
-            border: '1px solid #bbb', 
+            border: '1px solid var(--border)', 
             padding: 12, 
-            color: 'var(--foreground)', 
+            background: 'var(--background)',
+            color: 'var(--text-primary)', 
             fontWeight: 500,
             fontSize: 15,
             resize: 'vertical'
@@ -126,16 +129,17 @@ export default function NewProjectForm({
           style={{ 
             padding: 12, 
             borderRadius: 8, 
-            border: '1px solid #bbb', 
+            border: '1px solid var(--border)', 
             width: '100%',
             fontSize: 16,
-            background: '#fff'
+            background: 'var(--background)',
+            color: 'var(--text-primary)'
           }}
         >
-          <option value="" disabled={!!newProjectMode}>Bitte wählen ...</option>
-          <option value="vor_ort">🏢 Vor Ort</option>
-          <option value="hybrid">🔀 Hybrid</option>
-          <option value="remote">🏠 Nur remote</option>
+          <option value="" disabled={!!newProjectMode} style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>Bitte wählen ...</option>
+          <option value="vor_ort" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>🏢 Vor Ort</option>
+          <option value="hybrid" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>🔀 Hybrid</option>
+          <option value="remote" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>🏠 Nur remote</option>
         </select>
       </div>
 
