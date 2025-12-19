@@ -42,7 +42,8 @@ export default function DocumentationForm({
          dateien: editingDocumentation.dateien || [],
          meetingTyp: editingDocumentation.meeting_typ || '',
          interviewTyp: editingDocumentation.interview_typ || '',
-         tags: editingDocumentation.tags || []
+         tags: editingDocumentation.tags || [],
+         status: editingDocumentation.status || 'unfertig'
        };
      }
      return {
@@ -58,7 +59,8 @@ export default function DocumentationForm({
        dialoge: [{ text: '' }],
        kernfragen: [{ frage: '', antwort: '' }],
        dateien: [],
-       tags: []
+       tags: [],
+       status: 'unfertig'
      };
   });
   const [newPerson, setNewPerson] = useState({ vorname: '', nachname: '', email: '', position: '' });
@@ -273,10 +275,11 @@ export default function DocumentationForm({
         background: 'var(--surface)',
         borderRadius: 12,
         padding: '2rem',
-        maxWidth: 800,
+        maxWidth: '95vw',
+        width: 'min(1200px, 95vw)',
         maxHeight: '90vh',
         overflowY: 'auto',
-        width: '100%',
+        overflowX: 'hidden',
         boxShadow: 'var(--shadow-lg)',
         border: '1px solid var(--border)'
       }}>
@@ -427,7 +430,7 @@ export default function DocumentationForm({
 
             <div>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
-                Beschreibung
+                {liveDocumentationType === 'fieldnote' ? 'Notizen' : 'Beschreibung'}
               </label>
               <textarea
                 value={formData.beschreibung}
@@ -441,7 +444,7 @@ export default function DocumentationForm({
                   fontSize: 14,
                   resize: 'vertical'
                 }}
-                placeholder="Beschreibung der Dokumentation..."
+                placeholder={liveDocumentationType === 'fieldnote' ? 'Notizen zur Feldnotiz...' : 'Beschreibung der Dokumentation...'}
               />
             </div>
 
@@ -455,6 +458,29 @@ export default function DocumentationForm({
                 onTagsChange={handleTagsChange}
                 placeholder="Tag eingeben oder aus Vorschlägen wählen..."
               />
+            </div>
+
+            {/* Status */}
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
+                Status
+              </label>
+              <select
+                value={formData.status || 'unfertig'}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, status: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: 10,
+                  borderRadius: 6,
+                  border: '1px solid #ddd',
+                  fontSize: 14,
+                  background: 'var(--background)',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                <option value="unfertig">Unfertig</option>
+                <option value="fertig">Fertig</option>
+              </select>
             </div>
 
                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -631,78 +657,26 @@ export default function DocumentationForm({
             {/* Interview-spezifische Felder */}
             {liveDocumentationType === 'interview' && (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
-                      Interview-Typ
-                    </label>
-                    <select
-                      value={formData.interviewTyp || ''}
-                      onChange={(e) => setFormData((prev: any) => ({ ...prev, interviewTyp: e.target.value }))}
-                      style={{
-                        width: '100%',
-                        padding: 10,
-                        borderRadius: 6,
-                        border: '1px solid #ddd',
-                        fontSize: 14
-                      }}
-                    >
-                      <option value="">Bitte wählen...</option>
-                      <option value="online">Online</option>
-                      <option value="offline">Offline</option>
-                      <option value="hybrid">Hybrid</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
-                      Interviewpartner
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: 8, alignItems: 'end' }}>
-                      <input
-                        type="text"
-                        placeholder="Vorname"
-                        value={newPerson.vorname}
-                        onChange={(e) => setNewPerson(prev => ({ ...prev, vorname: e.target.value }))}
-                        style={{ padding: 8, borderRadius: 4, border: '1px solid #ddd', fontSize: 12 }}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Nachname *"
-                        value={newPerson.nachname}
-                        onChange={(e) => setNewPerson(prev => ({ ...prev, nachname: e.target.value }))}
-                        style={{ padding: 8, borderRadius: 4, border: '1px solid #ddd', fontSize: 12 }}
-                      />
-                      <input
-                        type="email"
-                        placeholder="E-Mail"
-                        value={newPerson.email}
-                        onChange={(e) => setNewPerson(prev => ({ ...prev, email: e.target.value }))}
-                        style={{ padding: 8, borderRadius: 4, border: '1px solid #ddd', fontSize: 12 }}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Position"
-                        value={newPerson.position}
-                        onChange={(e) => setNewPerson(prev => ({ ...prev, position: e.target.value }))}
-                        style={{ padding: 8, borderRadius: 4, border: '1px solid #ddd', fontSize: 12 }}
-                      />
-                      <button
-                        onClick={handleAddPerson}
-                        disabled={!newPerson.nachname.trim()}
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: 4,
-                          background: '#4CAF50',
-                          color: '#fff',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: 12
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
+                    Interview-Typ
+                  </label>
+                  <select
+                    value={formData.interviewTyp || ''}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, interviewTyp: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: 10,
+                      borderRadius: 6,
+                      border: '1px solid #ddd',
+                      fontSize: 14
+                    }}
+                  >
+                    <option value="">Bitte wählen...</option>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                    <option value="hybrid">Hybrid</option>
+                  </select>
                 </div>
 
                 {/* Kernfragen für Interview */}

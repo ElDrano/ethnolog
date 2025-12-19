@@ -5,6 +5,8 @@ interface DocumentationFiltersProps {
   documentations: any[];
   activeDocumentationFilters: string[];
   onFilterChange: (filters: string[], showAll: boolean) => void;
+  statusFilter: 'alle' | 'fertig' | 'unfertig';
+  onStatusFilterChange: (status: 'alle' | 'fertig' | 'unfertig') => void;
   onExportWord?: () => void;
   onExportPDF?: () => void;
   exportingWord?: boolean;
@@ -15,6 +17,8 @@ export default function DocumentationFilters({
   documentations,
   activeDocumentationFilters,
   onFilterChange,
+  statusFilter,
+  onStatusFilterChange,
   onExportWord,
   onExportPDF,
   exportingWord = false,
@@ -167,6 +171,36 @@ export default function DocumentationFilters({
           </span>
         </label>
       )}
+
+      {/* Status Filter Dropdown */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <label style={{ 
+          fontSize: 12, 
+          fontWeight: 600, 
+          color: 'var(--text-primary)',
+          whiteSpace: 'nowrap'
+        }}>
+          Status:
+        </label>
+        <select
+          value={statusFilter}
+          onChange={(e) => onStatusFilterChange(e.target.value as 'alle' | 'fertig' | 'unfertig')}
+          style={{
+            padding: '6px 12px',
+            borderRadius: 6,
+            border: '1px solid var(--border)',
+            background: 'var(--background)',
+            color: 'var(--text-primary)',
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          <option value="alle">Alle ({documentations.length})</option>
+          <option value="unfertig">Unfertig ({documentations.filter(d => d.status === 'unfertig' || !d.status).length})</option>
+          <option value="fertig">Fertig ({documentations.filter(d => d.status === 'fertig').length})</option>
+        </select>
+      </div>
 
       {/* Export Button */}
       {(onExportWord || onExportPDF) && (
