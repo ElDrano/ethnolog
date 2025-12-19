@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../supabaseClient';
 
 interface TagFilterProps {
   documentations: any[];
@@ -15,47 +14,21 @@ export default function TagFilter({
 }: TagFilterProps) {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
-  // Lade verfügbare Tags aus der Datenbank und aus den Dokumentationen
+  // Lade verfügbare Tags nur aus den Dokumentationen des aktuellen Projekts
   useEffect(() => {
-    const loadAvailableTags = async () => {
-      try {
-        // Lade Tags aus der Datenbank
-        const { data: dbTags, error } = await supabase
-          .from('available_tags')
-          .select('name')
-          .order('name');
-
-        if (error) {
-          console.error('Fehler beim Laden der Tags aus der Datenbank:', error);
-        }
-
-        // Sammle auch Tags aus den Dokumentationen (für Backward-Kompatibilität)
-        const docTags = new Set<string>();
-        documentations.forEach(doc => {
-          if (doc.tags && Array.isArray(doc.tags)) {
-            doc.tags.forEach((tag: string) => docTags.add(tag));
+    // Sammle nur Tags aus den übergebenen Dokumentationen (projektspezifisch)
+    const tags = new Set<string>();
+    documentations.forEach(doc => {
+      if (doc.tags && Array.isArray(doc.tags)) {
+        doc.tags.forEach((tag: string) => {
+          // Nur nicht-leere Tags hinzufügen
+          if (tag && tag.trim()) {
+            tags.add(tag.trim());
           }
         });
-
-        // Kombiniere Tags aus Datenbank und Dokumentationen
-        const dbTagNames = dbTags?.map(tag => tag.name) || [];
-        const allTags = new Set([...dbTagNames, ...Array.from(docTags)]);
-        setAvailableTags(Array.from(allTags).sort());
-      } catch (error) {
-        console.error('Fehler beim Laden der Tags:', error);
-        
-        // Fallback: Sammle nur Tags aus den Dokumentationen
-        const tags = new Set<string>();
-        documentations.forEach(doc => {
-          if (doc.tags && Array.isArray(doc.tags)) {
-            doc.tags.forEach((tag: string) => tags.add(tag));
-          }
-        });
-        setAvailableTags(Array.from(tags).sort());
       }
-    };
-
-    loadAvailableTags();
+    });
+    setAvailableTags(Array.from(tags).sort());
   }, [documentations]);
 
   const handleTagToggle = (tag: string) => {

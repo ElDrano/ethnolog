@@ -11,6 +11,7 @@ interface DateRangeFilterProps {
   hasFiles?: boolean;
   downloading?: boolean;
   projektCreatedAt?: string; // Neues Feld für Projekterstellungsdatum
+  onFullRangeSet?: (start: string, end: string) => void; // Callback für "Gesamter Zeitraum"
 }
 
 export default function DateRangeFilter({
@@ -22,7 +23,8 @@ export default function DateRangeFilter({
   onDownloadFiles,
   hasFiles = false,
   downloading = false,
-  projektCreatedAt
+  projektCreatedAt,
+  onFullRangeSet
 }: DateRangeFilterProps) {
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
@@ -35,9 +37,14 @@ export default function DateRangeFilter({
       // Projekterstellungsdatum als Startdatum verwenden
       const projectStartDate = projektCreatedAt.split('T')[0];
       
-      // Beide Datumsänderungen auf einmal durchführen
-      onStartDateChange(projectStartDate);
-      onEndDateChange(todayString);
+      // Wenn Callback vorhanden, verwende diesen (setzt beide Daten gleichzeitig)
+      if (onFullRangeSet) {
+        onFullRangeSet(projectStartDate, todayString);
+      } else {
+        // Fallback: Beide Datumsänderungen auf einmal durchführen
+        onStartDateChange(projectStartDate);
+        onEndDateChange(todayString);
+      }
     }
   };
 

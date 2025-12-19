@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 
 export default function DarkModeToggle() {
-  const [darkMode, setDarkMode] = useState(false);
+  // Standardmäßig Dark Mode aktivieren
+  const [darkMode, setDarkMode] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -50,4 +51,4 @@ export default function DarkModeToggle() {
       {darkMode ? 'Light Mode' : 'Dark Mode'}
     </button>
   );
-} 
+}
