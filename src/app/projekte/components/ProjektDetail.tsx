@@ -83,6 +83,7 @@ export default function ProjektDetail({
 
   const [documentations, setDocumentations] = useState<any[]>([]);
   const [activeDocumentationFilters, setActiveDocumentationFilters] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<'alle' | 'fertig' | 'unfertig'>('alle');
   const [showAll, setShowAll] = useState(true); // Initial "Alle" aktiviert
   const [documentationLoading, setDocumentationLoading] = useState(false);
   const [expandedDocumentations, setExpandedDocumentations] = useState<{[id:string]: boolean}>({});
@@ -227,12 +228,23 @@ export default function ProjektDetail({
         if (showAll) return true;
         if (activeDocumentationFilters.length === 0) return false;
         
+        // Prüfe Status-Filter
+        const docStatus = doc.status || 'unfertig';
+        if (statusFilter !== 'alle' && docStatus !== statusFilter) {
+          return false;
+        }
+        
         const isArchivSelected = activeDocumentationFilters.includes('archiv');
         const isArchivDoc = doc.typ === 'archiv';
         const isLiveTypeSelected = activeDocumentationFilters.some(filter => 
           filter === 'meeting' || filter === 'interview' || filter === 'fieldnote'
         );
         const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
+        
+        const hasTypeFilters = isArchivSelected || isLiveTypeSelected;
+        if (!hasTypeFilters) {
+          return true;
+        }
         
         return (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
       }).map(doc => doc.id);
@@ -244,12 +256,23 @@ export default function ProjektDetail({
         if (showAll) return true;
         if (activeDocumentationFilters.length === 0) return false;
         
+        // Prüfe Status-Filter
+        const docStatus = doc.status || 'unfertig';
+        if (statusFilter !== 'alle' && docStatus !== statusFilter) {
+          return false;
+        }
+        
         const isArchivSelected = activeDocumentationFilters.includes('archiv');
         const isArchivDoc = doc.typ === 'archiv';
         const isLiveTypeSelected = activeDocumentationFilters.some(filter => 
           filter === 'meeting' || filter === 'interview' || filter === 'fieldnote'
         );
         const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
+        
+        const hasTypeFilters = isArchivSelected || isLiveTypeSelected;
+        if (!hasTypeFilters) {
+          return true;
+        }
         
         return (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
       }).map(doc => doc.id);
@@ -413,6 +436,12 @@ export default function ProjektDetail({
         if (showAll) return true; // Wenn "Alle" explizit aktiviert ist
         if (activeDocumentationFilters.length === 0) return false; // Wenn keine Filter aktiv sind, nichts anzeigen
         
+        // Prüfe Status-Filter
+        const docStatus = doc.status || 'unfertig';
+        if (statusFilter !== 'alle' && docStatus !== statusFilter) {
+          return false;
+        }
+        
         // Prüfen ob Archiv ausgewählt ist
         const isArchivSelected = activeDocumentationFilters.includes('archiv');
         const isArchivDoc = doc.typ === 'archiv';
@@ -422,6 +451,12 @@ export default function ProjektDetail({
           filter === 'meeting' || filter === 'interview' || filter === 'fieldnote'
         );
         const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
+        
+        // Wenn keine Typ-Filter aktiv sind, zeige alle passenden Dokumentationen (Status-Filter wurde bereits geprüft)
+        const hasTypeFilters = isArchivSelected || isLiveTypeSelected;
+        if (!hasTypeFilters) {
+          return true;
+        }
         
         // Dokumentation anzeigen wenn:
         // - Archiv ausgewählt UND es ist eine Archiv-Dokumentation
@@ -543,6 +578,18 @@ export default function ProjektDetail({
          if (showAll) return true; // Wenn "Alle" explizit aktiviert ist
          if (activeDocumentationFilters.length === 0) return false; // Wenn keine Filter aktiv sind, nichts anzeigen
          
+         // Prüfe Status-Filter
+         const statusFertigSelected = activeDocumentationFilters.includes('status_fertig');
+         const statusUnfertigSelected = activeDocumentationFilters.includes('status_unfertig');
+         const docStatus = doc.status || 'unfertig';
+         
+         let passesStatusFilter = true;
+         if (statusFertigSelected || statusUnfertigSelected) {
+           passesStatusFilter = (statusFertigSelected && docStatus === 'fertig') || 
+                               (statusUnfertigSelected && docStatus === 'unfertig');
+           if (!passesStatusFilter) return false;
+         }
+         
          // Prüfen ob Archiv ausgewählt ist
          const isArchivSelected = activeDocumentationFilters.includes('archiv');
          const isArchivDoc = doc.typ === 'archiv';
@@ -553,10 +600,16 @@ export default function ProjektDetail({
          );
          const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
          
+         // Wenn nur Status-Filter aktiv sind, zeige alle passenden Dokumentationen
+         const hasTypeFilters = isArchivSelected || isLiveTypeSelected;
+         if (!hasTypeFilters) {
+           return passesStatusFilter;
+         }
+         
          // Dokumentation anzeigen wenn:
          // - Archiv ausgewählt UND es ist eine Archiv-Dokumentation
          // - Live-Typ ausgewählt UND es ist eine passende Live-Dokumentation
-         return (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
+         return ((isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc)) && passesStatusFilter;
        });
 
        // Wenn spezifische Dokumentationen ausgewählt sind, nur diese verwenden
@@ -920,6 +973,18 @@ export default function ProjektDetail({
          if (showAll) return true; // Wenn "Alle" explizit aktiviert ist
          if (activeDocumentationFilters.length === 0) return false; // Wenn keine Filter aktiv sind, nichts anzeigen
          
+         // Prüfe Status-Filter
+         const statusFertigSelected = activeDocumentationFilters.includes('status_fertig');
+         const statusUnfertigSelected = activeDocumentationFilters.includes('status_unfertig');
+         const docStatus = doc.status || 'unfertig';
+         
+         let passesStatusFilter = true;
+         if (statusFertigSelected || statusUnfertigSelected) {
+           passesStatusFilter = (statusFertigSelected && docStatus === 'fertig') || 
+                               (statusUnfertigSelected && docStatus === 'unfertig');
+           if (!passesStatusFilter) return false;
+         }
+         
          // Prüfen ob Archiv ausgewählt ist
          const isArchivSelected = activeDocumentationFilters.includes('archiv');
          const isArchivDoc = doc.typ === 'archiv';
@@ -930,10 +995,16 @@ export default function ProjektDetail({
          );
          const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
          
+         // Wenn nur Status-Filter aktiv sind, zeige alle passenden Dokumentationen
+         const hasTypeFilters = isArchivSelected || isLiveTypeSelected;
+         if (!hasTypeFilters) {
+           return passesStatusFilter;
+         }
+         
          // Dokumentation anzeigen wenn:
          // - Archiv ausgewählt UND es ist eine Archiv-Dokumentation
          // - Live-Typ ausgewählt UND es ist eine passende Live-Dokumentation
-         return (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
+         return ((isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc)) && passesStatusFilter;
        });
 
        // Wenn spezifische Dokumentationen ausgewählt sind, nur diese verwenden
@@ -1301,6 +1372,7 @@ export default function ProjektDetail({
         endzeit: documentation.endzeit,
         typ: documentation.typ,
         untertyp: documentation.untertyp,
+        status: documentation.status || 'unfertig',
         
         // Meeting-spezifische Felder
         meeting_typ: documentation.meetingTyp || null,
@@ -1433,6 +1505,8 @@ export default function ProjektDetail({
                            <DocumentationFilters
                              documentations={documentations}
                              activeDocumentationFilters={activeDocumentationFilters}
+                             statusFilter={statusFilter}
+                             onStatusFilterChange={setStatusFilter}
                              onFilterChange={handleFilterChange}
                              onExportWord={handleExportWord}
                              onExportPDF={handleExportPDF}
@@ -1450,6 +1524,7 @@ export default function ProjektDetail({
                               documentations={documentations}
                               activeDocumentationFilters={activeDocumentationFilters}
                               showAll={showAll}
+                              statusFilter={statusFilter}
                               expandedDocumentations={expandedDocumentations}
                               onToggleExpanded={(docId) => setExpandedDocumentations(prev => ({ ...prev, [docId]: !prev[docId] }))}
                               onEditDocumentation={handleEditDocumentation}

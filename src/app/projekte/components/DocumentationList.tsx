@@ -14,6 +14,7 @@ interface DocumentationListProps {
   onToggleDocumentationSelection: (docId: string) => void;
   onSelectAllDocumentations: (selectAll: boolean) => void;
   selectedTags: string[];
+  statusFilter: 'alle' | 'fertig' | 'unfertig';
 }
 
 export default function DocumentationList({
@@ -27,9 +28,16 @@ export default function DocumentationList({
   selectedDocumentations,
   onToggleDocumentationSelection,
   onSelectAllDocumentations,
-  selectedTags
+  selectedTags,
+  statusFilter
 }: DocumentationListProps) {
   const filteredDocumentations = documentations.filter(doc => {
+    // Status-Filter immer anwenden (unabhängig von "Alle")
+    const docStatus = doc.status || 'unfertig';
+    if (statusFilter !== 'alle' && docStatus !== statusFilter) {
+      return false;
+    }
+    
     if (showAll) {
       // Wenn "Alle" aktiviert ist, nur Tag-Filter anwenden
       if (selectedTags.length === 0) return true;
@@ -51,8 +59,9 @@ export default function DocumentationList({
     );
     const isLiveDoc = doc.typ === 'live' && activeDocumentationFilters.includes(doc.untertyp);
     
-    // Typ-Filter prüfen
-    const passesTypeFilter = (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
+    // Wenn keine Typ-Filter aktiv sind, zeige alle passenden Dokumentationen (Status-Filter wurde bereits geprüft)
+    const hasTypeFilters = isArchivSelected || isLiveTypeSelected;
+    const passesTypeFilter = !hasTypeFilters || (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
     
     // Tag-Filter prüfen
     if (selectedTags.length === 0) {
@@ -62,7 +71,7 @@ export default function DocumentationList({
     if (!doc.tags || !Array.isArray(doc.tags)) return false;
     const passesTagFilter = selectedTags.every(tag => doc.tags.includes(tag));
     
-    // Beide Filter müssen passen
+    // Alle Filter müssen passen
     return passesTypeFilter && passesTagFilter;
   });
 
@@ -169,12 +178,32 @@ export default function DocumentationList({
                   <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                     {doc.name}
                   </h3>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-                    {doc.typ === 'archiv' ? 'Archiv' : 
-                     doc.untertyp === 'meeting' ? 'Meeting' :
-                     doc.untertyp === 'interview' ? 'Interview' :
-                     doc.untertyp === 'fieldnote' ? 'Feldnotiz' : 'Dokumentation'} • {new Date(doc.datum).toLocaleDateString('de-DE')}
-                    {doc.startzeit && doc.endzeit && ` • ${doc.startzeit} - ${doc.endzeit}`}
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span>
+                      {doc.typ === 'archiv' ? 'Archiv' : 
+                       doc.untertyp === 'meeting' ? 'Meeting' :
+                       doc.untertyp === 'interview' ? 'Interview' :
+                       doc.untertyp === 'fieldnote' ? 'Feldnotiz' : 'Dokumentation'}
+                    </span>
+                    <span>•</span>
+                    <span>{new Date(doc.datum).toLocaleDateString('de-DE')}</span>
+                    {doc.startzeit && doc.endzeit && (
+                      <>
+                        <span>•</span>
+                        <span>{doc.startzeit} - {doc.endzeit}</span>
+                      </>
+                    )}
+                    <span>•</span>
+                    <span style={{
+                      padding: '2px 8px',
+                      borderRadius: 12,
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      background: (doc.status || 'unfertig') === 'fertig' ? 'var(--success)' : 'var(--warning)',
+                      color: 'white'
+                    }}>
+                      {(doc.status || 'unfertig') === 'fertig' ? '✅ Fertig' : '⏳ Unfertig'}
+                    </span>
                   </div>
                   
                   {doc.tags && Array.isArray(doc.tags) && doc.tags.length > 0 && (
