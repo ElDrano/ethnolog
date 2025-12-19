@@ -116,6 +116,16 @@ export default function ProjektDetail({
     }
   };
 
+  // Spezielle Funktion für "Gesamter Zeitraum" - setzt beide Daten gleichzeitig
+  const handleFullProjectRange = (start: string, end: string) => {
+    // Alle State-Updates in einem Batch durchführen
+    setStartDate(start);
+    setEndDate(end);
+    setUseDateRange(true);
+    // Dokumentationen werden automatisch durch useEffect geladen, 
+    // da startDate, endDate und useDateRange in den Dependencies sind
+  };
+
   const handleClearDateRange = () => {
     setStartDate('');
     setEndDate('');
@@ -130,6 +140,8 @@ export default function ProjektDetail({
   const canEdit = isOwner || (sharedEntry && sharedEntry.role === 'write');
   // Mitglieder (read) können Dokumentationen erstellen, aber nicht Projekt bearbeiten
   const canCreateDocumentation = isOwner || sharedEntry;
+  // Alle Mitglieder (read und write) können Links bearbeiten
+  const canEditLinks = isOwner || sharedEntry;
 
 
 
@@ -1387,17 +1399,12 @@ export default function ProjektDetail({
         <ProjectLinks 
           projekt={projekt}
           user={user}
-          canEdit={canEdit}
+          canEdit={canEditLinks}
         />
 
                   {/* Dokumentations-Buttons - nur sichtbar wenn Berechtigung vorhanden */}
          {canCreateDocumentation && (
          <DocumentationButtons
-           onArchivClick={() => {
-             setShowNewDocumentation(true);
-             setDocumentationType('archiv');
-             setNewDocumentation((prev: any) => ({ ...prev, datum: selectedDate }));
-           }}
            onLiveClick={() => {
              setShowNewDocumentation(true);
              setDocumentationType('live');
@@ -1413,6 +1420,7 @@ export default function ProjektDetail({
                           onStartDateChange={handleStartDateChange}
                           onEndDateChange={handleEndDateChange}
                           onClearRange={handleClearDateRange}
+                          onFullRangeSet={handleFullProjectRange}
                           onDownloadFiles={handleDownloadFiles}
                           hasFiles={hasFilesInRange}
                           downloading={downloadingFiles}

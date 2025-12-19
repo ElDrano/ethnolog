@@ -22,8 +22,8 @@ export default function DocumentationForm({
   onSave,
   editingDocumentation
 }: DocumentationFormProps) {
-  const [liveDocumentationType, setLiveDocumentationType] = useState<'meeting' | 'interview' | 'fieldnote' | null>(
-    editingDocumentation?.untertyp || null
+  const [liveDocumentationType, setLiveDocumentationType] = useState<'meeting' | 'interview' | 'fieldnote' | 'archiv' | null>(
+    editingDocumentation?.untertyp || (editingDocumentation?.typ === 'archiv' ? 'archiv' : null)
   );
   const [formData, setFormData] = useState<any>(() => {
          if (editingDocumentation) {
@@ -247,7 +247,8 @@ export default function DocumentationForm({
     const finalData = {
       ...formData,
       projekt_id: projekt.id,
-      untertyp: liveDocumentationType,
+      typ: liveDocumentationType === 'archiv' ? 'archiv' : (documentationType || 'live'),
+      untertyp: liveDocumentationType === 'archiv' ? null : liveDocumentationType,
       tags: formData.tags || [],
       dateien: audioFile ? [...formData.dateien, audioFile] : formData.dateien
     };
@@ -282,16 +283,16 @@ export default function DocumentationForm({
                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
            <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>
              {editingDocumentation ? 
-               `${documentationType === 'archiv' ? 'Archiv-Dokumentation' : 
-                  liveDocumentationType === 'meeting' ? 'Meeting' :
+               `${liveDocumentationType === 'meeting' ? 'Meeting' :
                   liveDocumentationType === 'interview' ? 'Interview' :
                   liveDocumentationType === 'fieldnote' ? 'Feldnotiz' :
-                  'Live-Dokumentation'} bearbeiten` :
-               `${documentationType === 'archiv' ? 'Archiv-Dokumentation' : 
-                  liveDocumentationType === 'meeting' ? 'Meeting' :
+                  liveDocumentationType === 'archiv' ? 'Archiv-Dokumentation' :
+                  'Dokumentation'} bearbeiten` :
+               `${liveDocumentationType === 'meeting' ? 'Meeting' :
                   liveDocumentationType === 'interview' ? 'Interview' :
                   liveDocumentationType === 'fieldnote' ? 'Feldnotiz' :
-                  'Live-Dokumentation'} erstellen`
+                  liveDocumentationType === 'archiv' ? 'Archiv-Dokumentation' :
+                  'Dokumentation'} erstellen`
              }
            </h2>
           <button
@@ -312,9 +313,9 @@ export default function DocumentationForm({
         {documentationType === 'live' && !liveDocumentationType && (
           <div style={{ marginBottom: 24 }}>
             <label style={{ display: 'block', fontWeight: 600, marginBottom: 12, fontSize: 16, color: 'var(--text-primary)' }}>
-              Typ der Live-Dokumentation:
+              Typ der Dokumentation:
             </label>
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               <button
                 onClick={() => setLiveDocumentationType('meeting')}
                 style={{
@@ -359,6 +360,21 @@ export default function DocumentationForm({
                 }}
               >
                 📝 Feldnotiz
+              </button>
+              <button
+                onClick={() => setLiveDocumentationType('archiv')}
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: 8,
+                  border: '2px solid var(--primary-blue)',
+                  background: 'var(--surface)',
+                  color: 'var(--primary-blue)',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontSize: 14
+                }}
+              >
+                📦 Archiv-Dokumentation
               </button>
             </div>
           </div>
